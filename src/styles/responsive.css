@@ -1,0 +1,605 @@
+/* ==========================================================================
+   SDF OILCHEMS ERP - COMPREHENSIVE RESPONSIVE STYLES
+   Platforms: Desktop, Tablet (iPad/Android), Mobile Phones (iOS/Android)
+   Breakpoints:
+   - Extra Large Desktop: >= 1440px
+   - Desktop / Laptop: 1024px - 1439px
+   - Tablet (Landscape/Portrait): 768px - 1023px
+   - Large Mobile: 480px - 767px
+   - Small Mobile: 320px - 479px
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Desktop & Large Screens (>= 1024px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .erp-sidebar {
+    transform: translateX(0) !important;
+  }
+
+  .erp-sidebar-close-btn {
+    display: none !important;
+  }
+
+  .erp-drawer-backdrop {
+    display: none !important;
+  }
+
+  .erp-menu-btn {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tablets and smaller (< 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023.98px) {
+  .erp-sidebar {
+    transform: translateX(-100%);
+    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.4), 0 10px 15px -5px rgba(0, 0, 0, 0.2);
+    z-index: 100 !important;
+    width: min(320px, 85vw) !important;
+    background-color: #FFFFFF !important;
+    visibility: hidden;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s ease;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .erp-sidebar-nav {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .erp-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+  }
+
+  .erp-drawer-backdrop {
+    z-index: 90 !important;
+  }
+
+  .erp-sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  .erp-main-area {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .erp-menu-btn {
+    display: inline-flex !important;
+  }
+
+  .erp-topbar-search {
+    width: 180px;
+  }
+
+  .erp-content {
+    padding: var(--space-4);
+  }
+
+  /* Dashboard Pill group horizontal scroll on tablets */
+  .erp-dash-pill-group {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .erp-dash-pill-group::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .erp-dash-pill-group::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+  }
+
+  /* Grid adaptations */
+  .erp-grid-kpi {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .erp-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .erp-grid-equal-2col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Devices (< 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  /* Root & Layout */
+  .erp-shell {
+    overflow-x: hidden;
+  }
+
+  .erp-content {
+    padding: 12px;
+  }
+
+  /* Topbar */
+  .erp-topbar {
+    padding: 0 10px;
+    height: 52px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .erp-topbar-left {
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .erp-topbar-right {
+    gap: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .erp-topbar-search {
+    display: none !important; /* Conceal input on mobile topbar, use modal or mobile search button */
+  }
+
+  .erp-mobile-search-btn {
+    display: flex !important;
+  }
+
+  .erp-breadcrumbs {
+    display: none !important;
+  }
+
+  .erp-unit-badge {
+    padding: 3px 8px;
+    font-size: 0.6875rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+  }
+
+  .erp-unit-badge span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* My Tasks button collapses text on mobile */
+  .erp-tasks-btn {
+    width: 34px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    position: relative !important;
+  }
+
+  .erp-tasks-btn-text {
+    display: none !important;
+  }
+
+  .erp-tasks-badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    padding: 1px 4px !important;
+    font-size: 0.5625rem !important;
+    border: 1.5px solid #FFFFFF !important;
+  }
+
+  .erp-user-details {
+    display: none !important; /* Just avatar on mobile */
+  }
+
+  .erp-user-menu {
+    padding: 2px;
+  }
+
+  /* Page Header */
+  .erp-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .erp-page-header-title {
+    font-size: 1.25rem !important;
+  }
+
+  .erp-page-header-desc {
+    font-size: 0.75rem !important;
+  }
+
+  .erp-page-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .erp-page-actions > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* KPI Grid */
+  .erp-grid-kpi {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .erp-grid-3col {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  /* Filter Bar */
+  .erp-filter-bar {
+    padding: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .erp-filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .erp-filter-group > * {
+    width: 100% !important;
+  }
+
+  /* Horizontal Tab Button Rows across Approvals, Sales, Inventory, Finance, Masters */
+  .erp-tabs-row {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    padding-bottom: 6px !important;
+    padding-top: 2px !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #CBD5E1 transparent !important;
+  }
+
+  .erp-tabs-row::-webkit-scrollbar {
+    height: 4px !important;
+    display: block !important;
+  }
+
+  .erp-tabs-row::-webkit-scrollbar-thumb {
+    background: #CBD5E1 !important;
+    border-radius: 4px !important;
+  }
+
+  .erp-tabs-row > * {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Fallback for any other inline-styled flex button strips */
+  div[style*="display: flex"][style*="margin-bottom"],
+  div[style*="display:flex"][style*="margin-bottom"],
+  div[style*="display: flex"][style*="marginBottom"],
+  div[style*="display:flex"][style*="marginBottom"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    scrollbar-width: thin !important;
+    padding-bottom: 6px !important;
+  }
+
+  div[style*="display: flex"][style*="margin-bottom"] > *,
+  div[style*="display:flex"][style*="margin-bottom"] > *,
+  div[style*="display: flex"][style*="marginBottom"] > *,
+  div[style*="display:flex"][style*="marginBottom"] > * {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Tables & Horizontal Scroll */
+  .erp-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .erp-card-body-no-padding {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .erp-table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 8px;
+    border: none !important;
+  }
+
+  .erp-table {
+    min-width: 580px; /* Ensures table remains legible with touch scroll */
+    font-size: 0.75rem;
+    width: 100%;
+  }
+
+  .erp-table th,
+  .erp-table td {
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  /* Pagination */
+  .erp-pagination {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .erp-pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Modals */
+  .erp-modal-backdrop {
+    padding: 10px;
+    align-items: flex-end; /* Sheet style on mobile */
+  }
+
+  .erp-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .erp-modal-header {
+    padding: 14px 16px;
+  }
+
+  .erp-modal-body {
+    padding: 14px 16px;
+    max-height: calc(90vh - 125px);
+  }
+
+  .erp-modal-footer {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column !important;
+    gap: 8px;
+  }
+
+  .erp-modal-footer > * {
+    width: 100% !important;
+  }
+
+  .erp-modal-actions-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .erp-modal-actions-wrap > button,
+  .erp-modal-actions-wrap > * {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Form Grids */
+  .erp-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .erp-col-span-2 {
+    grid-column: span 1 !important;
+  }
+
+  /* Card headers */
+  .erp-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .erp-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .erp-card-body {
+    padding: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Small Phones (< 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 479.98px) {
+  .erp-topbar {
+    padding: 0 6px;
+    gap: 4px;
+    height: 50px;
+  }
+
+  .erp-topbar-left {
+    gap: 4px;
+  }
+
+  .erp-topbar-right {
+    gap: 4px;
+  }
+
+  .erp-unit-badge {
+    max-width: 90px;
+    padding: 2px 6px;
+    font-size: 0.625rem;
+  }
+
+  .erp-menu-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .erp-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .erp-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.6875rem !important;
+  }
+
+  .erp-content {
+    padding: 8px;
+  }
+
+  .erp-sidebar {
+    width: 85vw;
+  }
+
+  .erp-button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  /* Login page responsiveness on small phones */
+  .sdf-fluid-login-wrapper {
+    padding: 8px !important;
+  }
+
+  .sdf-login-card-container {
+    border-radius: 14px !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .sdf-login-form-column {
+    padding: 20px 14px !important;
+  }
+
+  .sdf-suite-prefix,
+  .sdf-suite-name {
+    font-size: 1.5rem !important;
+  }
+
+  .sdf-login-hero-column {
+    padding: 20px 14px !important;
+    min-height: 320px !important;
+  }
+
+  .sdf-hero-headline {
+    font-size: 1.25rem !important;
+  }
+
+  .sdf-hero-features-row,
+  .sdf-hero-pillars-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sdf-role-pills-row {
+    gap: 4px;
+  }
+
+  .sdf-role-chip {
+    padding: 2px 6px;
+    font-size: 0.625rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Grid Layout Utilities
+   -------------------------------------------------------------------------- */
+.erp-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.erp-grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.erp-grid-2col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.erp-grid-equal-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.erp-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.erp-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.erp-col-span-2 {
+  grid-column: span 2;
+}
