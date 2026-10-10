@@ -448,17 +448,27 @@ export function ErpProvider({ children }) {
   // Create Direct Sales Order
   const createSalesOrder = useCallback((soData) => {
     const id = getNextNumber('sales_order');
+    const totalQty = Number(soData.items?.[0]?.qty || soData.quantity || 40);
+    const defaultDeliveries = soData.deliveries || (soData.isMultiDelivery ? [
+      { id: 'D1', qty: Math.ceil(totalQty / 2), status: 'open', vehicleNo: 'TBD', dispatchDate: 'Phase 1 (Within 5 Days)', invoiced: false, invoiceId: null, paidAmount: 0 },
+      { id: 'D2', qty: Math.floor(totalQty / 2), status: 'open', vehicleNo: 'TBD', dispatchDate: 'Phase 2 (Within 12 Days)', invoiced: false, invoiceId: null, paidAmount: 0 },
+    ] : [
+      { id: 'D1', qty: totalQty, status: 'open', vehicleNo: 'TBD', dispatchDate: 'Immediate', invoiced: false, invoiceId: null, paidAmount: 0 },
+    ]);
+
     const newSo = {
       id,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       status: 'open',
-      deliveries: [{ id: 'D1', qty: soData.quantity || 20, status: 'open', vehicleNo: 'TBD', dispatchDate: 'TBD', invoiced: false, invoiceId: null, paidAmount: 0 }],
+      deliveries: defaultDeliveries,
       receivedPayment: 0,
       banking: {
         accountName: 'SDF Oilchems Limited',
-        accountNumber: '028905001928',
-        ifsc: 'HDFC0000289',
-        bankName: 'HDFC Bank, Commercial Branch, Dahej',
+        accountNumber: '002105001892',
+        ifsc: 'HDFC0000021',
+        bankName: 'HDFC Bank, Dahej SEZ Branch',
+        intermediaryBank: 'Standard Chartered Bank Mumbai (SCBLINBB)',
+        beneficiaryBank: 'HDFC Bank Limited, India',
       },
       history: [
         {
@@ -470,7 +480,43 @@ export function ErpProvider({ children }) {
       ...soData,
     };
     setSalesOrders((prev) => [newSo, ...prev]);
-    notify(`Sales Order ${id} created.`);
+
+    // Create Logistics Inward Work Order automatically
+    const newLogisticsTask = {
+      id: `LOG-TSK-${Date.now().toString().slice(-3)}`,
+      soNumber: id,
+      deliveryId: 'D1',
+      consignee: soData.consignee || soData.customerName || 'Consignee',
+      productName: soData.items?.[0]?.productName || 'Refined Chemical Grade',
+      weightMT: defaultDeliveries[0]?.qty || totalQty,
+      hsn: soData.items?.[0]?.hsn || '29054500',
+      packaging: soData.items?.[0]?.packaging || soData.packaging || 'Bulk Road Tanker',
+      containerType: soData.containerType || '20ft ISO Tank / FCL',
+      stuffingDate: 'Pending Schedule',
+      pol: soData.portOfLoading || 'Dahej Port / JNPT',
+      pod: soData.portOfDelivery || 'Customer Destination',
+      outwardTask: {
+        outwardDate: 'Pending Booking',
+        line: 'SafeChem Bulk Carriers',
+        rateFreight: '₹18,000/run',
+        vesselName: 'TBD',
+        gateOpen: '07:00 AM',
+        cutOff: '11:00 AM',
+        loadingDate: 'Pending',
+        bol: 'Pending',
+        sob: 'Pending',
+      },
+      stage: 'booking',
+      vehicleNo: 'TBD',
+      driverContact: 'TBD',
+      podUploaded: false,
+      history: [
+        { date: new Date().toLocaleString(), user: 'System (Auto Trigger)', action: `Inward Work Order generated for ${id}` },
+      ],
+    };
+    setLogisticsTasks((prev) => [newLogisticsTask, ...prev]);
+
+    notify(`Sales Order ${id} created and Logistics Inward Work Order auto-triggered.`);
     return newSo;
   }, [getNextNumber, currentUser.name, currentUser.role, notify]);
 

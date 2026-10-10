@@ -10,7 +10,7 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import ApprovalModal from '../../components/common/ApprovalModal';
 import { useErp } from '../../hooks/useErp';
-import { Plus, Download, Printer, ArrowRight, ShieldCheck, FileText, Pencil, Eye, ShoppingCart } from 'lucide-react';
+import { Plus, Download, Printer, ArrowRight, ShieldCheck, FileText, Pencil, Eye, ShoppingCart, Landmark, Building2, CheckCircle2, Truck } from 'lucide-react';
 
 export function SalesPage() {
   const {
@@ -117,16 +117,29 @@ export function SalesPage() {
     setEditingSo(null);
   };
 
-  // Direct SO Form
+  // Direct SO Form matching Section 1 spec
   const [soForm, setSoForm] = useState({
     customerId: '',
+    consignee: '',
+    buyerOtherThanConsignee: '',
     productId: '',
+    refPoNumber: 'PO-2026-881',
+    inwardPoTraded: 'No',
+    orderTerms: 'Ex-Work',
+    countryOfOrigin: 'India',
+    portOfLoading: 'Dahej Industrial Port / JNPT',
+    portOfDelivery: 'Client Delivery Site',
+    tradeName: 'OleoPure Gly-997',
+    hsn: '29054500',
+    spec: 'USP / IP 99.7% Min, APHA <10, Moisture <0.3%',
+    packaging: 'Bulk Road Tanker',
     quantity: 40,
     unitPrice: 96000,
-    orderTerms: 'Ex-Work',
-    portOfLoading: 'Dahej Plant #1',
-    portOfDelivery: 'Client Site',
+    containerType: '20ft ISO Tank / FCL',
+    loadingCapacity: '20 MT / Tanker',
+    isMultiDelivery: true,
     paymentTerms: '30 Days Net',
+    deliverySchedule: 'Split D1 (20 MT) & D2 (20 MT)',
   });
 
   // Filter Sales Orders
@@ -415,7 +428,7 @@ export function SalesPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <img src="/logo.png" alt="SDF Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
                 <div>
-                  <h2 style={{ color: 'var(--color-primary-dark)', margin: 0 }}>SDF OILCHEMS LIMITED</h2>
+                  <h2 style={{ color: 'var(--color-primary-dark)', margin: 0, fontSize: '1.25rem' }}>SDF OILCHEMS LIMITED</h2>
                   <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
                     Plot No. 1201, GIDC Industrial Estate, Dahej, Bharuch, Gujarat 392130<br />
                     GSTIN: 24AAACS8912P1ZA • CIN: U24230GJ2005PLC046123
@@ -423,62 +436,169 @@ export function SalesPage() {
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <h3 style={{ margin: 0, color: 'var(--color-primary-dark)' }}>{selectedRecordForView.data.id}</h3>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                  {selectedRecordForView.type === 'so' ? 'CHEMICAL SALES ORDER' : 'COMMERCIAL QUOTATION'}
+                </div>
+                <h3 style={{ margin: '2px 0', color: 'var(--color-primary-dark)' }}>{selectedRecordForView.data.id}</h3>
                 <div style={{ fontSize: 'var(--font-size-xs)' }}>Date: {selectedRecordForView.data.date}</div>
-                <StatusBadge status={selectedRecordForView.data.status} />
+                <div style={{ marginTop: 4 }}>
+                  <StatusBadge status={selectedRecordForView.data.status} />
+                </div>
               </div>
             </div>
 
-            {/* CX & Delivery Info */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, fontSize: 'var(--font-size-xs)' }}>
+            {/* Header Logistics & Contracting Parties */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 16,
+                fontSize: 'var(--font-size-xs)',
+                padding: 'var(--space-3)',
+                background: 'var(--color-bg-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
               <div>
-                <strong>CUSTOMER / BUYER:</strong>
-                <div>{selectedRecordForView.data.customerName}</div>
-                <div>{selectedRecordForView.data.consignee || 'Client Delivery Gate'}</div>
+                <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Building2 size={13} /> CONSIGNOR / PLACE OF ORIGIN:
+                </div>
+                <div>{selectedRecordForView.data.fromPlace || 'SDF Oilchems Limited, Dahej Plant #1, Gujarat'}</div>
+                <div style={{ marginTop: 8, fontWeight: 700, color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Building2 size={13} /> TO CONSIGNEE / DESTINATION:
+                </div>
+                <div><strong>{selectedRecordForView.data.consignee || selectedRecordForView.data.customerName}</strong></div>
+                {selectedRecordForView.data.buyerOtherThanConsignee && (
+                  <div style={{ marginTop: 4, color: 'var(--color-text-secondary)' }}>
+                    <em>Buyer (other than Consignee):</em> {selectedRecordForView.data.buyerOtherThanConsignee}
+                  </div>
+                )}
               </div>
+
               <div>
-                <strong>COMMERCIAL TERMS:</strong>
-                <div>Payment Terms: {selectedRecordForView.data.paymentTerms}</div>
-                <div>Delivery Terms: {selectedRecordForView.data.orderTerms || selectedRecordForView.data.deliverySchedule}</div>
+                <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4 }}>CONTRACT & SHIPPING DETAILS:</div>
+                <div><strong>Ref PO / Quotation No:</strong> {selectedRecordForView.data.poRef || selectedRecordForView.data.refPoNumber || selectedRecordForView.data.quoteRef || 'PO-DIRECT-2026'}</div>
+                <div><strong>Inward PO Type:</strong> {selectedRecordForView.data.inwardPoTraded === 'Yes' || selectedRecordForView.data.inwardPoTraded === true ? 'Traded Consignment' : 'Dahej Plant In-House Synthesis'}</div>
+                <div><strong>Order Terms (Incoterms):</strong> <span style={{ fontWeight: 700, color: 'var(--color-primary-dark)' }}>{selectedRecordForView.data.orderTerms || 'Ex-Work'}</span></div>
+                <div><strong>Country of Origin:</strong> {selectedRecordForView.data.countryOfOrigin || 'India'}</div>
+                <div><strong>Port of Loading (POL):</strong> {selectedRecordForView.data.portOfLoading || 'Dahej Port / Nhava Sheva (JNPT)'}</div>
+                <div><strong>Port of Delivery (POD):</strong> {selectedRecordForView.data.portOfDelivery || 'Customer Destination Gate'}</div>
               </div>
             </div>
 
-            {/* Items Table */}
-            <table className="erp-table">
-              <thead>
-                <tr>
-                  <th>Product Specification</th>
-                  <th>Packaging</th>
-                  <th style={{ textAlign: 'right' }}>Quantity</th>
-                  <th style={{ textAlign: 'right' }}>Unit Rate</th>
-                  <th style={{ textAlign: 'right' }}>Total (INR)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(selectedRecordForView.data.items || []).map((it, i) => (
-                  <tr key={i}>
-                    <td>
-                      <strong>{it.productName}</strong>
-                      <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>{it.spec || it.tradeName}</div>
-                    </td>
-                    <td>{it.packaging}</td>
-                    <td style={{ textAlign: 'right' }}>{it.qty} {it.uom}</td>
-                    <td style={{ textAlign: 'right' }}>₹{Number(it.unitPrice).toLocaleString()}</td>
-                    <td style={{ textAlign: 'right' }}>₹{(Number(it.unitPrice) * Number(it.qty)).toLocaleString()}</td>
+            {/* Technical Items Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table className="erp-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>Sr.</th>
+                    <th>Product & Trade Name</th>
+                    <th>HSN Code</th>
+                    <th>Specification Guarantee</th>
+                    <th>Packaging / Container</th>
+                    <th style={{ textAlign: 'right' }}>Capacity / Qty</th>
+                    <th style={{ textAlign: 'right' }}>Rate / MT (INR)</th>
+                    <th style={{ textAlign: 'right' }}>Total Value (INR)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {(selectedRecordForView.data.items || []).map((it, i) => (
+                    <tr key={i}>
+                      <td>{it.srNo || i + 1}</td>
+                      <td>
+                        <strong>{it.productName}</strong>
+                        {it.tradeName && <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>Trade: {it.tradeName}</div>}
+                      </td>
+                      <td><code>{it.hsn || '29054500'}</code></td>
+                      <td style={{ fontSize: '0.6875rem', maxWidth: 180 }}>{it.spec || 'Standard Monograph Guaranteed'}</td>
+                      <td>
+                        <div>{it.packaging || 'Bulk Road Tanker'}</div>
+                        <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>{it.containerType || selectedRecordForView.data.containerType || '20ft ISO Tank / FCL'}</div>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <strong>{it.qty} {it.uom || 'MT'}</strong>
+                        <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>{it.loadingCapacity || selectedRecordForView.data.loadingCapacity || '20 MT / Tanker'}</div>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>₹{Number(it.unitPrice).toLocaleString()}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <strong style={{ color: 'var(--color-primary-dark)' }}>
+                          ₹{(Number(it.unitPrice) * Number(it.qty)).toLocaleString()}
+                        </strong>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Banking Details Box (SDF Oilchems Limited Defaults) */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 12,
+                fontSize: 'var(--font-size-xs)',
+                padding: 'var(--space-3)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)',
+                background: '#FAFAFB',
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Landmark size={13} /> OFFICIAL BANK REMITTANCE INSTRUCTIONS:
+                </div>
+                <div><strong>Account Name:</strong> SDF Oilchems Limited</div>
+                <div><strong>Account Number:</strong> 002105001892</div>
+                <div><strong>IFSC Code:</strong> HDFC0000021</div>
+                <div><strong>Beneficiary Bank:</strong> HDFC Bank, Dahej SEZ Branch, Gujarat, India</div>
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4 }}>INTERNATIONAL / INTERMEDIARY ROUTING:</div>
+                <div><strong>Intermediary Bank:</strong> Standard Chartered Bank, Mumbai (SCBLINBB)</div>
+                <div><strong>Beneficiary Bank:</strong> HDFC Bank Limited, India</div>
+                <div><strong>Payment Terms:</strong> <strong style={{ color: 'var(--color-primary-dark)' }}>{selectedRecordForView.data.paymentTerms}</strong></div>
+                <div><strong>Delivery Schedule:</strong> {selectedRecordForView.data.deliverySchedule || 'Phase 1 & Phase 2 Execution'}</div>
+              </div>
+            </div>
+
+            {/* Multi-Delivery Breakdown if present */}
+            {selectedRecordForView.data.deliveries && selectedRecordForView.data.deliveries.length > 0 && (
+              <div style={{ fontSize: 'var(--font-size-xs)', padding: 'var(--space-2) var(--space-3)', background: 'var(--color-bg-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                <strong>Multi-Delivery Shipment Schedule:</strong>
+                <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+                  {selectedRecordForView.data.deliveries.map((del) => (
+                    <div key={del.id} style={{ border: '1px solid var(--color-border)', padding: '4px 8px', borderRadius: 4, background: '#fff' }}>
+                      <strong>{del.id}:</strong> {del.qty} MT • Status: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{del.status}</span> • Vehicle: {del.vehicleNo || 'TBD'}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Footer with Authorized Signature */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--color-border)', fontSize: 'var(--font-size-xs)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '2px solid var(--color-border)', fontSize: 'var(--font-size-xs)' }}>
               <div>
-                <strong>Prepared By:</strong> {selectedRecordForView.data.preparedBy || currentUser.name}
+                <div><strong>Prepared By:</strong> {selectedRecordForView.data.preparedBy || currentUser.name}</div>
+                <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.6875rem' }}>Electronic Generation Reference: SDF-ERP-V2</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ color: 'var(--color-primary-dark)', fontWeight: 700, border: '1px dashed var(--color-action-green)', padding: '6px 12px', borderRadius: 4 }}>
-                  Digitally Authorized: {selectedRecordForView.data.authorizedSign || 'Rajesh Sharma (Plant Head)'}
-                </div>
+                {selectedRecordForView.data.status === 'open' ? (
+                  <div style={{ color: 'var(--color-warning-dark, #b45309)', fontWeight: 700, border: '1px dashed #f59e0b', padding: '6px 12px', borderRadius: 4, background: '#fffbeb' }}>
+                    Pending HOD Digital Approval
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--color-action-green, #15803d)', fontWeight: 700, border: '1px solid #16a34a', padding: '6px 14px', borderRadius: 4, background: '#f0fdf4', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={15} color="#16a34a" />
+                    <div>
+                      <div>DIGITALLY AUTHORIZED BY HOD</div>
+                      <div style={{ fontSize: '0.6875rem', fontWeight: 500, color: 'var(--color-text-secondary)' }}>
+                        {selectedRecordForView.data.authorizedSign || 'Rajesh Sharma (Plant Head / HOD)'}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -541,13 +661,13 @@ export function SalesPage() {
         </div>
       </Modal>
 
-      {/* Create Direct SO Modal */}
+      {/* Create Direct SO Modal (Matching Section 1 Specification) */}
       <Modal
         isOpen={isSoModalOpen}
         onClose={() => setIsSoModalOpen(false)}
         title="Direct Sales Order Booking (SOL/SO)"
-        description="Creates production-committed order and assigns logistics inward work order."
-        size="md"
+        description="Creates production-committed order (SOL/SO), assigns logistics work order, and routes to HOD."
+        size="lg"
         footer={
           <>
             <Button variant="secondary" onClick={() => setIsSoModalOpen(false)}>Cancel</Button>
@@ -556,29 +676,44 @@ export function SalesPage() {
               onClick={() => {
                 const c = customers.find((cust) => cust.id === soForm.customerId) || customers[0];
                 const p = products.find((prod) => prod.id === soForm.productId) || products[0];
+                const qty = Number(soForm.quantity) || 40;
+                const unitPrice = Number(soForm.unitPrice) || 96000;
+                const total = qty * unitPrice;
+
                 createSalesOrder({
                   customerId: c.id,
                   customerName: c.companyName,
-                  consignee: c.companyName,
-                  buyer: c.companyName,
+                  fromPlace: 'Dahej Plant #1, Gujarat',
+                  consignee: soForm.consignee || c.companyName,
+                  buyer: soForm.buyerOtherThanConsignee || c.companyName,
+                  buyerOtherThanConsignee: soForm.buyerOtherThanConsignee || '',
+                  refPoNumber: soForm.refPoNumber,
+                  inwardPoTraded: soForm.inwardPoTraded,
+                  orderTerms: soForm.orderTerms,
+                  countryOfOrigin: soForm.countryOfOrigin || 'India',
+                  portOfLoading: soForm.portOfLoading,
+                  portOfDelivery: soForm.portOfDelivery,
+                  containerType: soForm.containerType,
+                  loadingCapacity: soForm.loadingCapacity,
+                  isMultiDelivery: Boolean(soForm.isMultiDelivery),
                   items: [{
                     srNo: 1,
                     productId: p.id,
                     productName: p.productName,
-                    tradeName: p.productCode,
-                    packaging: 'Bulk Road Tanker',
-                    unitPrice: soForm.unitPrice,
-                    qty: Number(soForm.quantity),
+                    tradeName: soForm.tradeName || p.productCode,
+                    hsn: soForm.hsn || '29054500',
+                    spec: soForm.spec || 'Standard Monograph Guaranteed',
+                    packaging: soForm.packaging,
+                    containerType: soForm.containerType,
+                    loadingCapacity: soForm.loadingCapacity,
+                    unitPrice: unitPrice,
+                    qty: qty,
                     uom: 'MT',
-                    total: Number(soForm.unitPrice) * Number(soForm.quantity),
+                    total: total,
                   }],
-                  totalValue: Number(soForm.unitPrice) * Number(soForm.quantity),
-                  orderTerms: soForm.orderTerms,
-                  countryOfOrigin: 'India',
-                  portOfLoading: soForm.portOfLoading,
-                  portOfDelivery: soForm.portOfDelivery,
+                  totalValue: total,
                   paymentTerms: soForm.paymentTerms,
-                  deliverySchedule: 'Immediate production',
+                  deliverySchedule: soForm.deliverySchedule,
                   preparedBy: currentUser.name,
                   authorizedSign: 'Rajesh Sharma (Plant Head / HOD)',
                 });
@@ -590,31 +725,213 @@ export function SalesPage() {
           </>
         }
       >
-        <div className="erp-form-grid">
-          <Select
-            label="Customer Account (from Master)"
-            value={soForm.customerId}
-            onChange={(e) => setSoForm({ ...soForm, customerId: e.target.value })}
-            options={customers.map((c) => ({ value: c.id, label: c.companyName }))}
-          />
-          <Select
-            label="Product Grade (from Master)"
-            value={soForm.productId}
-            onChange={(e) => setSoForm({ ...soForm, productId: e.target.value })}
-            options={products.map((p) => ({ value: p.id, label: p.productName }))}
-          />
-          <Input
-            label="Volume (MT)"
-            type="number"
-            value={soForm.quantity}
-            onChange={(e) => setSoForm({ ...soForm, quantity: e.target.value })}
-          />
-          <Input
-            label="Unit Rate / MT (INR)"
-            type="number"
-            value={soForm.unitPrice}
-            onChange={(e) => setSoForm({ ...soForm, unitPrice: e.target.value })}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Section 1.1: Header & Contracting Parties */}
+          <div>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '0.8125rem', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Building2 size={14} /> 1. Header Details & Contracting Parties
+            </h4>
+            <div className="erp-form-grid">
+              <Select
+                label="Customer Account (from Master)"
+                value={soForm.customerId}
+                onChange={(e) => {
+                  const sel = customers.find((c) => c.id === e.target.value);
+                  setSoForm({
+                    ...soForm,
+                    customerId: e.target.value,
+                    consignee: sel?.companyName || soForm.consignee,
+                  });
+                }}
+                options={customers.map((c) => ({ value: c.id, label: c.companyName }))}
+              />
+              <Input
+                label="To Consignee / Destination"
+                value={soForm.consignee}
+                placeholder="Consignee delivery address / gate"
+                onChange={(e) => setSoForm({ ...soForm, consignee: e.target.value })}
+              />
+              <Input
+                label="Buyer other than Consignee (Optional)"
+                value={soForm.buyerOtherThanConsignee}
+                placeholder="Leave blank if buyer is consignee"
+                onChange={(e) => setSoForm({ ...soForm, buyerOtherThanConsignee: e.target.value })}
+              />
+              <Input
+                label="Ref PO / Quotation Number"
+                value={soForm.refPoNumber}
+                onChange={(e) => setSoForm({ ...soForm, refPoNumber: e.target.value })}
+              />
+              <Select
+                label="Order Terms (Incoterms)"
+                value={soForm.orderTerms}
+                onChange={(e) => setSoForm({ ...soForm, orderTerms: e.target.value })}
+                options={[
+                  { value: 'Ex-Work', label: 'EX-WORK (Dahej Gate)' },
+                  { value: 'FOB', label: 'FOB (Free On Board Port)' },
+                  { value: 'CFR', label: 'CFR (Cost & Freight)' },
+                  { value: 'CIF', label: 'CIF (Cost, Insurance & Freight)' },
+                  { value: 'LC', label: 'LC (Letter of Credit Sight)' },
+                ]}
+              />
+              <Select
+                label="Inward PO if Traded"
+                value={soForm.inwardPoTraded}
+                onChange={(e) => setSoForm({ ...soForm, inwardPoTraded: e.target.value })}
+                options={[
+                  { value: 'No', label: 'No - In-House Dahej Synthesis' },
+                  { value: 'Yes', label: 'Yes - Traded Chemical Consignment' },
+                ]}
+              />
+              <Input
+                label="Port of Loading (POL)"
+                value={soForm.portOfLoading}
+                onChange={(e) => setSoForm({ ...soForm, portOfLoading: e.target.value })}
+              />
+              <Input
+                label="Port of Delivery (POD)"
+                value={soForm.portOfDelivery}
+                onChange={(e) => setSoForm({ ...soForm, portOfDelivery: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Section 1.2: Items Specification & Logistics */}
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '0.8125rem', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Truck size={14} /> 2. Items Specification, Container & Packaging
+            </h4>
+            <div className="erp-form-grid">
+              <Select
+                label="Chemical Product Grade"
+                value={soForm.productId}
+                onChange={(e) => {
+                  const sel = products.find((p) => p.id === e.target.value);
+                  setSoForm({
+                    ...soForm,
+                    productId: e.target.value,
+                    tradeName: sel?.productCode || soForm.tradeName,
+                    unitPrice: sel?.rate || soForm.unitPrice,
+                  });
+                }}
+                options={products.map((p) => ({ value: p.id, label: p.productName }))}
+              />
+              <Input
+                label="Trade Name / Brand"
+                value={soForm.tradeName}
+                onChange={(e) => setSoForm({ ...soForm, tradeName: e.target.value })}
+              />
+              <Input
+                label="HSN Code"
+                value={soForm.hsn}
+                onChange={(e) => setSoForm({ ...soForm, hsn: e.target.value })}
+              />
+              <Input
+                label="Specification Guarantee"
+                value={soForm.spec}
+                onChange={(e) => setSoForm({ ...soForm, spec: e.target.value })}
+              />
+              <Select
+                label="Packaging"
+                value={soForm.packaging}
+                onChange={(e) => setSoForm({ ...soForm, packaging: e.target.value })}
+                options={[
+                  { value: 'Bulk Road Tanker', label: 'Bulk Road Tanker (Insulated)' },
+                  { value: '250 kg Drum', label: '250 kg HM-HDPE Drums' },
+                  { value: '1000L IBC Tote', label: '1000L Composite IBC Tote' },
+                  { value: '25 kg Bags on Pallets', label: '25 kg Bags on Pallets' },
+                ]}
+              />
+              <Select
+                label="Container Type"
+                value={soForm.containerType}
+                onChange={(e) => setSoForm({ ...soForm, containerType: e.target.value })}
+                options={[
+                  { value: '20ft ISO Tank / FCL', label: '20ft ISO Tank / FCL' },
+                  { value: '20ft FCL Box Container', label: '20ft FCL Box Container' },
+                  { value: 'Road Tanker (3-Axle)', label: 'Road Tanker (3-Axle)' },
+                  { value: '40ft High Cube Container', label: '40ft High Cube Container' },
+                ]}
+              />
+              <Input
+                label="Loading Capacity"
+                value={soForm.loadingCapacity}
+                onChange={(e) => setSoForm({ ...soForm, loadingCapacity: e.target.value })}
+              />
+              <Input
+                label="Volume Quantity (MT)"
+                type="number"
+                value={soForm.quantity}
+                onChange={(e) => setSoForm({ ...soForm, quantity: e.target.value })}
+              />
+              <Input
+                label="Unit Rate / MT (INR)"
+                type="number"
+                value={soForm.unitPrice}
+                onChange={(e) => setSoForm({ ...soForm, unitPrice: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Section 1.3: Commercial Terms & Split Shipment */}
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '0.8125rem', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Landmark size={14} /> 3. Commercial Terms & Multi-Delivery Split
+            </h4>
+            <div className="erp-form-grid">
+              <Select
+                label="Multi-delivery Shipment"
+                value={soForm.isMultiDelivery ? 'yes' : 'no'}
+                onChange={(e) => setSoForm({ ...soForm, isMultiDelivery: e.target.value === 'yes' })}
+                options={[
+                  { value: 'yes', label: 'Yes - Split Deliveries (D1 + D2)' },
+                  { value: 'no', label: 'No - Single Shipment' },
+                ]}
+              />
+              <Select
+                label="Payment Terms"
+                value={soForm.paymentTerms}
+                onChange={(e) => setSoForm({ ...soForm, paymentTerms: e.target.value })}
+                options={[
+                  { value: '30 Days Net', label: '30 Days Net' },
+                  { value: '100% Against Documents', label: '100% Against Documents (CAD)' },
+                  { value: 'Letter of Credit (LC) at Sight', label: 'Letter of Credit (LC) at Sight' },
+                  { value: '15 Days Net', label: '15 Days Net' },
+                  { value: 'Advance Payment', label: '100% Advance Wire Transfer' },
+                ]}
+              />
+              <Input
+                label="Delivery Schedule"
+                value={soForm.deliverySchedule}
+                onChange={(e) => setSoForm({ ...soForm, deliverySchedule: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Value Summary & Default Banking Banner */}
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-primary-light)',
+              border: '1px solid var(--color-primary)',
+              fontSize: 'var(--font-size-xs)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <strong>Total Sales Order Value:</strong>
+              <strong style={{ fontSize: '1rem', color: 'var(--color-primary-dark)' }}>
+                ₹{(Number(soForm.unitPrice || 0) * Number(soForm.quantity || 0)).toLocaleString()}
+              </strong>
+            </div>
+            <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.6875rem' }}>
+              ✓ Default Bank Remittance: HDFC Bank Dahej (A/C: 002105001892, IFSC: HDFC0000021) • Intermediary: SCBLINBB<br />
+              ✓ On submission, order routes to HOD for sign-off and auto-generates Logistics Inward Work Order.
+            </div>
+          </div>
         </div>
       </Modal>
 
