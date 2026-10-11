@@ -228,6 +228,17 @@ export function SalesPage() {
           >
             View SO
           </Button>
+          {row.status !== 'open' && (
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={<Download size={12} />}
+              title="Download Authorized Form with HOD Signature"
+              onClick={() => setSelectedRecordForView({ type: 'so', data: row })}
+            >
+              Download PDF
+            </Button>
+          )}
           <Button
             size="sm"
             variant="secondary"
