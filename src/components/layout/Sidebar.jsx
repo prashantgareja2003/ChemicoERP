@@ -43,7 +43,7 @@ export function Sidebar({ isOpen, onClose }) {
         },
         {
           to: '/production',
-          label: 'Reactors & Yield',
+          label: 'Production',
           icon: Factory,
           color: '#EA580C', // Orange / Reactor Heat
           bgColor: '#FFF7ED',

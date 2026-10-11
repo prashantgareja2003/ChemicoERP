@@ -286,6 +286,76 @@ export function ErpProvider({ children }) {
     notify(`Production run logged: +${qtyKg} kg ${prodData.productName}. Added to finished stock.`);
   }, [notify]);
 
+  const addBatchForSalesOrder = useCallback((soId, batchData) => {
+    const qtyKg = Number(batchData.quantityKg || 0);
+    const batchNo = batchData.batchNo || `B-2610-${Date.now().toString().slice(-3)}`;
+    const reactor = batchData.reactor || 'Reactor 01 (Fractionation)';
+
+    // 1. Add Stock in live inventory
+    if (batchData.productId) {
+      setStock((prev) =>
+        prev.map((s) =>
+          s.productId === batchData.productId ? { ...s, stockKg: s.stockKg + qtyKg } : s
+        )
+      );
+    }
+
+    // 2. Mark Sales Order as batch synthesized
+    setSalesOrders((prev) =>
+      prev.map((s) => {
+        if (s.id === soId) {
+          return {
+            ...s,
+            status: 'in production',
+            batchAdded: true,
+            batchNo,
+            reactorVessel: reactor,
+            history: [
+              ...(s.history || []),
+              {
+                date: new Date().toLocaleString(),
+                user: `${currentUser.name} (Production Supervisor)`,
+                action: `Batch ${batchNo} (${(qtyKg / 1000).toFixed(1)} MT) synthesized in ${reactor} and forwarded to QC Lab for monograph testing`,
+              },
+            ],
+          };
+        }
+        return s;
+      })
+    );
+
+    // 3. Create Pending QC Test Monograph for the synthesized Batch
+    const so = salesOrders.find((s) => s.id === soId);
+    const prodName = batchData.productName || so?.items?.[0]?.productName || so?.product || 'Refined Chemical Grade';
+    const spec = batchData.spec || so?.items?.[0]?.spec || so?.spec || 'USP / BP Chemical Standards';
+
+    const newQcRecord = {
+      id: `QC-REL-26-${Date.now().toString().slice(-4)}`,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      product: prodName,
+      soNumber: soId,
+      batchNo,
+      quantityKg: qtyKg,
+      spec,
+      parameters: [
+        { parameter: 'Assay (Purity %)', specification: 'Min 99.7%', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Color (APHA)', specification: 'Max 10 APHA', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Heavy Metals (as Pb)', specification: 'Max 5 ppm', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Water Content', specification: 'Max 0.3%', result: 'Pending Lab Run', passed: false },
+      ],
+      checkedBy: 'Awaiting Lab Testing',
+      status: 'pending',
+      failedDetails: null,
+      history: [
+        { date: new Date().toLocaleString(), user: `${currentUser.name} (Production)`, action: `Batch ${batchNo} synthesized. QC Test indent generated.` },
+      ],
+    };
+
+    setQcRecords((prev) => [newQcRecord, ...prev]);
+
+    notify(`Batch ${batchNo} synthesized in ${reactor} (+${qtyKg} kg). Lab QC indent generated!`);
+  }, [salesOrders, currentUser.name, notify]);
+
   const addLocalMiscEntry = useCallback((data) => {
     const id = getNextNumber('local_misc');
     const newEntry = { id, date: new Date().toLocaleDateString(), createdBy: currentUser.name, ...data };
@@ -460,6 +530,7 @@ export function ErpProvider({ children }) {
       id,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       status: 'open',
+      batchAdded: false,
       deliveries: defaultDeliveries,
       receivedPayment: 0,
       banking: {
@@ -516,31 +587,7 @@ export function ErpProvider({ children }) {
     };
     setLogisticsTasks((prev) => [newLogisticsTask, ...prev]);
 
-    // Create Pending QC Test Monograph for the Sales Order
-    const newQcRecord = {
-      id: `QC-REL-26-${Date.now().toString().slice(-4)}`,
-      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      product: soData.items?.[0]?.productName || soData.product || 'Refined Chemical Grade',
-      soNumber: id,
-      batchNo: `B-2610-${Date.now().toString().slice(-3)}`,
-      quantityKg: totalQty * 1000,
-      spec: soData.items?.[0]?.spec || 'USP Monograph Guaranteed',
-      parameters: [
-        { parameter: 'Assay (Purity %)', specification: 'Min 99.7%', result: 'Pending Lab Run', passed: false },
-        { parameter: 'Color (APHA)', specification: 'Max 10 APHA', result: 'Pending Lab Run', passed: false },
-        { parameter: 'Heavy Metals (as Pb)', specification: 'Max 5 ppm', result: 'Pending Lab Run', passed: false },
-        { parameter: 'Water Content', specification: 'Max 0.3%', result: 'Pending Lab Run', passed: false },
-      ],
-      checkedBy: 'Awaiting Lab Testing',
-      status: 'pending',
-      failedDetails: null,
-      history: [
-        { date: new Date().toLocaleString(), user: 'System (Auto Trigger)', action: `QC Test Indent logged for ${id}` },
-      ],
-    };
-    setQcRecords((prev) => [newQcRecord, ...prev]);
-
-    notify(`Sales Order ${id} created, Logistics Task & Lab QC Indent raised.`);
+    notify(`Sales Order ${id} created. Awaiting HOD Approval & Plant Batch Synthesis.`);
     return newSo;
   }, [getNextNumber, currentUser.name, currentUser.role, notify]);
 
@@ -814,22 +861,23 @@ export function ErpProvider({ children }) {
   }, [currentUser.name, currentUser.role, notify]);
 
   // Pass Pending QC Record (Approves Monograph & Enables Multi-Part Dispatch)
-  const passQcRecord = useCallback((qcId) => {
+  const passQcRecord = useCallback((qcId, customParams = null) => {
     const timestamp = new Date().toLocaleString();
     let soRef = '';
     setQcRecords((prev) =>
       prev.map((qc) => {
         if (qc.id === qcId) {
           soRef = qc.soNumber;
+          const updatedParameters = customParams || qc.parameters.map((p) => ({
+            ...p,
+            passed: true,
+            result: p.result.includes('Pending') ? (p.specification.includes('Min') ? '99.82%' : p.specification.includes('Max 10') ? '6 APHA' : 'Conforms') : p.result,
+          }));
           return {
             ...qc,
             status: 'passed',
             checkedBy: `${currentUser.name} (${currentUser.role})`,
-            parameters: qc.parameters.map((p) => ({
-              ...p,
-              passed: true,
-              result: p.result.includes('Pending') ? (p.specification.includes('Min') ? '99.82%' : p.specification.includes('Max 10') ? '6 APHA' : 'Conforms') : p.result,
-            })),
+            parameters: updatedParameters,
             history: [
               ...(qc.history || []),
               {
@@ -1280,6 +1328,7 @@ export function ErpProvider({ children }) {
         handleUniversalApproval,
         recordQcTest,
         passQcRecord,
+        addBatchForSalesOrder,
         releaseDeliveryToDispatch,
         updateLogisticsTask,
         generateInvoice,

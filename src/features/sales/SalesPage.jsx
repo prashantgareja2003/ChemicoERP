@@ -900,7 +900,7 @@ export function SalesPage() {
                 <ShoppingCart size={14} /> Quotation Items Grid ({quoteItems.length} Products)
               </h4>
               <Button size="sm" variant="secondary" icon={<Plus size={13} />} onClick={handleAddQuoteItem}>
-                + Add Another Product
+                Add Another Product
               </Button>
             </div>
 
@@ -1178,7 +1178,7 @@ export function SalesPage() {
                 <Truck size={14} /> 2. Items Specification, Container & Packaging Table Grid ({soItems.length} Products)
               </h4>
               <Button size="sm" variant="secondary" icon={<Plus size={13} />} onClick={handleAddSoItem}>
-                + Add Another Product
+                Add Another Product
               </Button>
             </div>
 

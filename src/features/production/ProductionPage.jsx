@@ -13,32 +13,45 @@ import { Plus, FileText, Truck, CheckCircle2, Factory, ArrowRight, Clock, Shield
 
 export function ProductionPage() {
   const navigate = useNavigate();
-  const { salesOrders, products, qcRecords, addProductionOutput, releaseDeliveryToDispatch } = useErp();
+  const { salesOrders, products, qcRecords, addBatchForSalesOrder, releaseDeliveryToDispatch } = useErp();
 
   const [selectedSoForPlan, setSelectedSoForPlan] = useState(null);
-  const [isDailyEntryModalOpen, setIsDailyEntryModalOpen] = useState(false);
+  const [selectedSoForBatch, setSelectedSoForBatch] = useState(null);
 
   const [batchForm, setBatchForm] = useState({
-    productId: '',
-    batchNo: 'B-2610-888',
-    quantityKg: 25000,
     reactor: 'Reactor 01 (Fractionation)',
+    batchNo: 'B-2610-888',
+    quantityKg: 40000,
   });
 
-  // Approved SOs for Production view (active SOs)
-  const approvedSos = salesOrders.filter((s) => s.status === 'open' || s.status === 'in production' || s.status === 'part-delivered' || s.status === 'dispatched');
+  // Approved SOs for Production view (active SOs approved by HOD)
+  const approvedSos = salesOrders.filter((s) => s.status === 'in production' || s.status === 'part-delivered' || s.status === 'dispatched' || s.hodApproved);
 
-  const handleRecordBatch = (e) => {
+  const handleOpenAddBatch = (row) => {
+    setSelectedSoForBatch(row);
+    const totalKg = Number(row.items?.[0]?.qty || row.quantity || 40) * 1000;
+    setBatchForm({
+      reactor: 'Reactor 01 (Fractionation)',
+      batchNo: `B-2610-${Date.now().toString().slice(-3)}`,
+      quantityKg: totalKg,
+    });
+  };
+
+  const handleCommitBatch = (e) => {
     e.preventDefault();
-    const prod = products.find((p) => p.id === batchForm.productId) || products[0];
+    if (!selectedSoForBatch) return;
+    const prod = products.find((p) => p.productName === (selectedSoForBatch.items?.[0]?.productName || selectedSoForBatch.product)) || products[0];
 
-    addProductionOutput({
-      productId: prod.id,
-      productName: prod.productName,
+    addBatchForSalesOrder(selectedSoForBatch.id, {
+      productId: prod?.id,
+      productName: selectedSoForBatch.items?.[0]?.productName || selectedSoForBatch.product,
+      spec: selectedSoForBatch.items?.[0]?.spec || selectedSoForBatch.spec,
+      batchNo: batchForm.batchNo,
       quantityKg: Number(batchForm.quantityKg),
+      reactor: batchForm.reactor,
     });
 
-    setIsDailyEntryModalOpen(false);
+    setSelectedSoForBatch(null);
   };
 
   const soColumns = [
@@ -91,6 +104,7 @@ export function ProductionPage() {
       title: 'Production State',
       render: (val, row) => {
         const soQc = (qcRecords || []).filter((q) => q.soNumber === row.id);
+        const hasBatch = Boolean(row.batchAdded) || soQc.length > 0;
         const isQcPassed = soQc.length > 0 && soQc.every((q) => q.status === 'passed');
         const isQcFailed = soQc.some((q) => q.status === 'failed');
 
@@ -114,6 +128,17 @@ export function ProductionPage() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
             >
               Part Dispatched ({row.deliveries.filter((d) => d.status === 'dispatched' || d.status === 'delivered').map((d) => d.id).join(', ')})
+            </span>
+          );
+        }
+
+        if (!hasBatch) {
+          return (
+            <span
+              className="badge badge--neutral"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#F1F5F9', color: '#475569', border: '1px solid #CBD5E1' }}
+            >
+              <Factory size={12} /> Awaiting Batch Synthesis
             </span>
           );
         }
@@ -156,43 +181,13 @@ export function ProductionPage() {
       align: 'right',
       render: (_, row) => {
         const soQc = (qcRecords || []).filter((q) => q.soNumber === row.id);
+        const hasBatch = Boolean(row.batchAdded) || soQc.length > 0;
         const isQcPassed = soQc.length > 0 && soQc.every((q) => q.status === 'passed');
-
-        if (!isQcPassed) {
-          return (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: '#92400e',
-                  background: '#fef3c7',
-                  padding: '4px 8px',
-                  borderRadius: 'var(--radius-sm)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  border: '1px solid #fde68a',
-                }}
-              >
-                <Clock size={12} /> Awaiting QC/QA Pass
-              </span>
-              <Button
-                size="sm"
-                variant="secondary"
-                icon={<ShieldCheck size={13} />}
-                onClick={() => navigate('/qc')}
-              >
-                QC Lab
-              </Button>
-            </div>
-          );
-        }
 
         const allDispatched = row.deliveries && row.deliveries.length > 0 && row.deliveries.every((d) => d.status === 'dispatched' || d.status === 'delivered');
         const anyDispatched = row.deliveries && row.deliveries.some((d) => d.status === 'dispatched' || d.status === 'delivered');
 
-        // Once all parts are dispatched, do not show the Multi-Part Dispatch button
+        // Once all parts are dispatched, show All Lots Dispatched & Track Logistics
         if (allDispatched) {
           return (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -239,6 +234,53 @@ export function ProductionPage() {
           );
         }
 
+        // 1. If batch is not added yet: show "Add Batch"
+        if (!hasBatch) {
+          return (
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<Plus size={13} />}
+              onClick={() => handleOpenAddBatch(row)}
+            >
+              Add Batch
+            </Button>
+          );
+        }
+
+        // 2. If batch added, but QC has not passed yet: show Awaiting QC/QA Pass & QC Lab
+        if (!isQcPassed) {
+          return (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: '#92400e',
+                  background: '#fef3c7',
+                  padding: '4px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  border: '1px solid #fde68a',
+                }}
+              >
+                <Clock size={12} /> Awaiting QC/QA Pass
+              </span>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<ShieldCheck size={13} />}
+                onClick={() => navigate('/qc')}
+              >
+                QC Lab
+              </Button>
+            </div>
+          );
+        }
+
+        // 3. QC Passed: Show Multi-Part Dispatch (D1, D2)
         return (
           <Button
             size="sm"
@@ -256,17 +298,8 @@ export function ProductionPage() {
   return (
     <div>
       <PageHeader
-        title="Production Scheduling & Reactor Vessels"
-        description="Workflow: Approved Sales Orders → Daily Output Recording → Lab QC Handover → Dispatch Allocation"
-        actions={
-          <Button
-            variant="primary"
-            icon={<Plus size={15} />}
-            onClick={() => setIsDailyEntryModalOpen(true)}
-          >
-            Record Daily Batch Output
-          </Button>
-        }
+        title="Production"
+        description="Workflow: Approved Sales Orders → Batch Synthesis → Lab QC Monograph → Dispatch Allocation"
       />
 
       {/* Production View: Approved Orders */}
@@ -293,11 +326,15 @@ export function ProductionPage() {
           }
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)' }}>
-            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)' }}>
+            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              <div><strong>SO Number:</strong> {selectedSoForPlan.id}</div>
+              <div><strong>Customer Account:</strong> {selectedSoForPlan.customerName}</div>
               <div><strong>Product:</strong> {selectedSoForPlan.items?.[0]?.productName || selectedSoForPlan.product}</div>
               <div><strong>Target Volume:</strong> {selectedSoForPlan.items?.[0]?.qty || selectedSoForPlan.quantity} MT</div>
               <div><strong>Packaging Type:</strong> {selectedSoForPlan.items?.[0]?.packaging || selectedSoForPlan.packaging || 'Bulk Road Tanker'}</div>
               <div><strong>Chemical Specification:</strong> {selectedSoForPlan.items?.[0]?.spec || selectedSoForPlan.spec || 'Standard Guaranteed'}</div>
+              <div><strong>Lead Time:</strong> {selectedSoForPlan.leadTime || '5-7 Business Days'}</div>
+              <div><strong>Local Transportation Pickup:</strong> {selectedSoForPlan.deliveries?.[0]?.dispatchDate || 'Phase Scheduled (Within 5 Days)'}</div>
             </div>
 
             {/* Multi Part Delivery (D1, D2) to Logistics Handover */}
@@ -394,56 +431,67 @@ export function ProductionPage() {
         </Modal>
       )}
 
-      {/* Record Daily Batch Modal */}
-      <Modal
-        isOpen={isDailyEntryModalOpen}
-        onClose={() => setIsDailyEntryModalOpen(false)}
-        title="Record Daily Reactor Batch Run"
-        description="Deducts raw feedstock and posts chemical output into live inventory."
-        size="sm"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsDailyEntryModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleRecordBatch}>
-              Commit Output Batch
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleRecordBatch} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Select
-            label="Product Synthesized"
-            required
-            value={batchForm.productId}
-            onChange={(e) => setBatchForm({ ...batchForm, productId: e.target.value })}
-            options={products.map((p) => ({ value: p.id, label: p.productName }))}
-          />
-          <Select
-            label="Processing Vessel"
-            value={batchForm.reactor}
-            onChange={(e) => setBatchForm({ ...batchForm, reactor: e.target.value })}
-            options={[
-              { value: 'Reactor 01 (Fractionation)', label: 'Reactor 01 (Fractionation)' },
-              { value: 'Reactor 02 (Esterification)', label: 'Reactor 02 (Esterification)' },
-              { value: 'Autoclave A-02 (Hydrogenation)', label: 'Autoclave A-02 (Hydrogenation)' },
-              { value: 'Vacuum Distillation Column 04', label: 'Vacuum Distillation Column 04' },
-            ]}
-          />
-          <Input
-            label="Batch Serial Number"
-            required
-            value={batchForm.batchNo}
-            onChange={(e) => setBatchForm({ ...batchForm, batchNo: e.target.value })}
-          />
-          <Input
-            label="Quantity Produced (kg)"
-            type="number"
-            required
-            value={batchForm.quantityKg}
-            onChange={(e) => setBatchForm({ ...batchForm, quantityKg: e.target.value })}
-          />
-        </form>
-      </Modal>
+      {/* Modal: Add Batch for specific Sales Order */}
+      {selectedSoForBatch && (
+        <Modal
+          isOpen={Boolean(selectedSoForBatch)}
+          onClose={() => setSelectedSoForBatch(null)}
+          title={`Charge & Synthesize Batch: ${selectedSoForBatch.id}`}
+          description={`Customer: ${selectedSoForBatch.customerName} • Target Order: ${selectedSoForBatch.items?.[0]?.qty || selectedSoForBatch.quantity || 40} MT`}
+          size="md"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setSelectedSoForBatch(null)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleCommitBatch}>
+                Commit Batch & Send to QC Lab
+              </Button>
+            </>
+          }
+        >
+          <form onSubmit={handleCommitBatch} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)', fontSize: 'var(--font-size-xs)' }}>
+              <div><strong>Product:</strong> {selectedSoForBatch.items?.[0]?.productName || selectedSoForBatch.product}</div>
+              <div><strong>Order Ref:</strong> {selectedSoForBatch.id} ({selectedSoForBatch.customerName})</div>
+              <div><strong>Standard Monograph:</strong> {selectedSoForBatch.items?.[0]?.spec || selectedSoForBatch.spec || 'USP / BP Chemical Standards'}</div>
+            </div>
+
+            <Select
+              label="Select Reactor / Synthesis Vessel"
+              required
+              value={batchForm.reactor}
+              onChange={(e) => setBatchForm({ ...batchForm, reactor: e.target.value })}
+              options={[
+                { value: 'Reactor 01 (Fractionation)', label: 'Reactor 01 (Fractionation)' },
+                { value: 'Reactor 02 (Esterification)', label: 'Reactor 02 (Esterification)' },
+                { value: 'Autoclave A-02 (Hydrogenation)', label: 'Autoclave A-02 (Hydrogenation)' },
+                { value: 'Vacuum Distillation Column 04', label: 'Vacuum Distillation Column 04' },
+              ]}
+            />
+
+            <Input
+              label="Assigned Batch Serial #"
+              required
+              value={batchForm.batchNo}
+              onChange={(e) => setBatchForm({ ...batchForm, batchNo: e.target.value })}
+              placeholder="e.g. B-2610-890"
+            />
+
+            <Input
+              label="Batch Quantity Produced (kg)"
+              type="number"
+              required
+              value={batchForm.quantityKg}
+              onChange={(e) => setBatchForm({ ...batchForm, quantityKg: e.target.value })}
+            />
+
+            <div style={{ fontSize: '0.75rem', color: '#92400e', background: '#FEF3C7', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid #FDE68A' }}>
+              ℹ️ <strong>Workflow Notice:</strong> Committing this batch records production and automatically sends this lot to <strong>QC Lab</strong> for Monograph analytical testing before dispatch can be unlocked.
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

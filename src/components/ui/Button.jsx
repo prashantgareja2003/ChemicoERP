@@ -27,6 +27,11 @@ export function Button({
     .filter(Boolean)
     .join(' ');
 
+  const cleanChildren =
+    typeof children === 'string' && icon
+      ? children.replace(/^\+\s*/, '')
+      : children;
+
   return (
     <button
       type={type}
@@ -38,12 +43,12 @@ export function Button({
       {isLoading ? (
         <>
           <Loader2 className="erp-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-          <span>{children}</span>
+          <span>{cleanChildren}</span>
         </>
       ) : (
         <>
           {icon && iconPosition === 'left' && <span className="btn-icon">{icon}</span>}
-          {children && <span>{children}</span>}
+          {cleanChildren && <span>{cleanChildren}</span>}
           {icon && iconPosition === 'right' && <span className="btn-icon">{icon}</span>}
         </>
       )}

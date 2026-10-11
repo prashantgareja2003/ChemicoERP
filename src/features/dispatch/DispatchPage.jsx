@@ -115,16 +115,27 @@ export function DispatchPage() {
           }
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)' }}>
-            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)' }}>
-              <div><strong>Consignee:</strong> {selectedTask.consignee}</div>
-              <div><strong>Chemical Consignment:</strong> {selectedTask.productName} ({selectedTask.weightMT} MT)</div>
-              <div><strong>HSN Code:</strong> {selectedTask.hsn} • Packaging: {selectedTask.packaging}</div>
-              <div><strong>Container Specification:</strong> {selectedTask.containerType}</div>
+            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              <div><strong>From CX / Place:</strong> {selectedTask.fromPlace || 'SDF Oilchems Dahej Plant #1'}</div>
+              <div><strong>To Consignee / Dest:</strong> {selectedTask.consignee}</div>
+              <div><strong>Buyer other than Consignee:</strong> {selectedTask.buyerOtherThanConsignee || 'Same as Consignee'}</div>
+              <div><strong>Sales Order Ref #:</strong> {selectedTask.soNumber} ({selectedTask.deliveryId})</div>
+            </div>
+
+            <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              <div><strong>Chemical Product Name:</strong> {selectedTask.productName}</div>
+              <div><strong>HSN Code:</strong> {selectedTask.hsn || '29054500'}</div>
+              <div><strong>Weight / Quantity:</strong> {selectedTask.weightMT} MT</div>
+              <div><strong>Price / Unit:</strong> {selectedTask.unitPrice ? `₹${selectedTask.unitPrice.toLocaleString()} / MT` : '₹96,000 / MT'}</div>
+              <div><strong>Packaging Type:</strong> {selectedTask.packaging || 'Bulk Road Tanker'}</div>
+              <div><strong>Container Type:</strong> {selectedTask.containerType || '20ft ISO Tank / FCL'}</div>
+              <div><strong>Stuffing Date:</strong> {selectedTask.stuffingDate || '10 Oct 2026'}</div>
+              <div><strong>Tanker Condition:</strong> {selectedTask.condition || 'Cleaned, Passivated & Nitrogen Blanketed'}</div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-              <div><strong>Port of Loading:</strong> {selectedTask.pol}</div>
-              <div><strong>Port of Delivery:</strong> {selectedTask.pod}</div>
+              <div><strong>Port of Loading (POL):</strong> {selectedTask.pol}</div>
+              <div><strong>Port of Delivery (POD):</strong> {selectedTask.pod}</div>
               <div><strong>Vehicle Number:</strong> {selectedTask.vehicleNo}</div>
               <div><strong>Driver Contact:</strong> {selectedTask.driverContact}</div>
               <div><strong>Customer POD Uploaded:</strong> {selectedTask.podUploaded ? '✓ Verified POD on file' : 'Pending Delivery'}</div>
@@ -188,29 +199,39 @@ export function DispatchPage() {
               onChange={(e) => setOutwardForm({ ...outwardForm, outwardDate: e.target.value })}
             />
             <Input
-              label="Carrier / Freight Line"
+              label="Line / Carrier Company"
               value={outwardForm.line}
               onChange={(e) => setOutwardForm({ ...outwardForm, line: e.target.value })}
             />
             <Input
-              label="Agreed Freight Rate"
+              label="Rate / Freight"
               value={outwardForm.rateFreight}
               onChange={(e) => setOutwardForm({ ...outwardForm, rateFreight: e.target.value })}
             />
             <Input
-              label="Tanker Vehicle / Vessel Name"
+              label="Vessel Name / Tanker No"
               value={outwardForm.vesselName}
               onChange={(e) => setOutwardForm({ ...outwardForm, vesselName: e.target.value })}
             />
             <Input
-              label="Bill of Lading / LR # (BOL)"
-              value={outwardForm.bol}
-              onChange={(e) => setOutwardForm({ ...outwardForm, bol: e.target.value })}
-            />
-            <Input
-              label="Gate Open / Cut-off Hours"
+              label="Gate Open Hours"
               value={outwardForm.gateOpen}
               onChange={(e) => setOutwardForm({ ...outwardForm, gateOpen: e.target.value })}
+            />
+            <Input
+              label="Cut-Off Time"
+              value={outwardForm.cutOff || '11:00 AM'}
+              onChange={(e) => setOutwardForm({ ...outwardForm, cutOff: e.target.value })}
+            />
+            <Input
+              label="Loading Date"
+              value={outwardForm.loadingDate || '10 Oct 2026'}
+              onChange={(e) => setOutwardForm({ ...outwardForm, loadingDate: e.target.value })}
+            />
+            <Input
+              label="Bill of Lading (BOL)"
+              value={outwardForm.bol}
+              onChange={(e) => setOutwardForm({ ...outwardForm, bol: e.target.value })}
             />
             <Input
               label="Shipped on Board (SOB)"

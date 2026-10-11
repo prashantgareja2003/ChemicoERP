@@ -52,7 +52,7 @@ const DUMMY_NOTIFICATIONS = [
 
 const ROUTE_NAMES = {
   '/': 'Live Plant Deck',
-  '/production': 'Reactors & Yield',
+  '/production': 'Production',
   '/qc': 'QC Batch Releases',
   '/sales': 'Sales & Contracts',
   '/dispatch': 'Tanker Logistics',

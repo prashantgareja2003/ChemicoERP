@@ -12,28 +12,44 @@ import { useErp } from '../../hooks/useErp';
 import { Plus, AlertTriangle, Eye, ShieldCheck } from 'lucide-react';
 
 export function QcPage() {
-  const { qcRecords, products, recordQcTest, passQcRecord, salesOrders } = useErp();
+  const { qcRecords, products, passQcRecord, salesOrders } = useErp();
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [isNewTestModalOpen, setIsNewTestModalOpen] = useState(false);
+  const [selectedRecordForTest, setSelectedRecordForTest] = useState(null);
   const [approvalModalState, setApprovalModalState] = useState({ isOpen: false, record: null });
 
   // Test Entry Form
   const [testForm, setTestForm] = useState({
-    productId: '',
-    soNumber: 'SOL/SO/2891',
-    batchNo: 'B-2610-884',
+    productName: '',
+    soNumber: '',
+    batchNo: '',
     quantityKg: 40000,
     spec: 'USP / BP Pharma Standard',
-    p1: '99.8',
+    p1: '99.82',
     p2: '6',
     p3: '<1',
     p4: '1.2614',
     p5: '0.12',
   });
 
+  const handleOpenRecordTest = (row) => {
+    setSelectedRecordForTest(row);
+    setTestForm({
+      productName: row.product,
+      soNumber: row.soNumber,
+      batchNo: row.batchNo,
+      quantityKg: row.quantityKg || 40000,
+      spec: row.spec || 'USP / BP Pharma Standard',
+      p1: '99.82',
+      p2: '6',
+      p3: '<1',
+      p4: '1.2614',
+      p5: '0.12',
+    });
+  };
+
   const handleRecordTest = (e) => {
     e.preventDefault();
-    const prod = products.find((p) => p.id === testForm.productId) || products[0];
+    if (!selectedRecordForTest) return;
 
     const parameters = [
       { parameter: 'Assay Purity %', specification: 'Min 99.7%', result: `${testForm.p1}%`, passed: Number(testForm.p1) >= 99.7 },
@@ -43,16 +59,8 @@ export function QcPage() {
       { parameter: 'Water Content %', specification: 'Max 0.3%', result: `${testForm.p5}%`, passed: Number(testForm.p5) <= 0.3 },
     ];
 
-    recordQcTest({
-      product: prod.productName,
-      soNumber: testForm.soNumber,
-      batchNo: testForm.batchNo,
-      quantityKg: Number(testForm.quantityKg),
-      spec: testForm.spec,
-      parameters,
-    });
-
-    setIsNewTestModalOpen(false);
+    passQcRecord(selectedRecordForTest.id, parameters);
+    setSelectedRecordForTest(null);
   };
 
   const columns = [
@@ -87,9 +95,9 @@ export function QcPage() {
               size="sm"
               variant="primary"
               icon={<ShieldCheck size={13} />}
-              onClick={() => passQcRecord(row.id)}
+              onClick={() => handleOpenRecordTest(row)}
             >
-              Test & Pass Monograph
+              Record Laboratory QC Test
             </Button>
           )}
           <Button
@@ -119,16 +127,7 @@ export function QcPage() {
     <div>
       <PageHeader
         title="Quality Control & QA Batch Releases"
-        description="Laboratory COA monographs, pass/fail disposition, and Out-of-Control Action Plans (OCAP)."
-        actions={
-          <Button
-            variant="primary"
-            icon={<Plus size={15} />}
-            onClick={() => setIsNewTestModalOpen(true)}
-          >
-            Record Laboratory QC Test
-          </Button>
-        }
+        description="Laboratory COA monographs, analytical parameter checks, pass/fail disposition, and Out-of-Control Action Plans (OCAP)."
       />
 
       <Card title="Batch Release Registry & Testing Monograph Archive" noPadding>
@@ -198,80 +197,88 @@ export function QcPage() {
         </Modal>
       )}
 
-      {/* Record Laboratory Test Modal */}
-      <Modal
-        isOpen={isNewTestModalOpen}
-        onClose={() => setIsNewTestModalOpen(false)}
-        title="Record New Batch QC Test"
-        description="Run analytical check against certified pharmacopeia / chemical monograph."
-        size="md"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsNewTestModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleRecordTest}>
-              Save & Release Batch
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleRecordTest} className="erp-form-grid">
-          <Select
-            label="Product Grade"
-            required
-            value={testForm.productId}
-            onChange={(e) => setTestForm({ ...testForm, productId: e.target.value })}
-            options={products.map((p) => ({ value: p.id, label: p.productName }))}
-          />
-          <Input
-            label="Sales Order Ref"
-            required
-            value={testForm.soNumber}
-            onChange={(e) => setTestForm({ ...testForm, soNumber: e.target.value })}
-          />
-          <Input
-            label="Reactor Batch #"
-            required
-            value={testForm.batchNo}
-            onChange={(e) => setTestForm({ ...testForm, batchNo: e.target.value })}
-          />
-          <Input
-            label="Quantity (kg)"
-            type="number"
-            required
-            value={testForm.quantityKg}
-            onChange={(e) => setTestForm({ ...testForm, quantityKg: e.target.value })}
-          />
+      {/* Record Laboratory Test Modal for selected pending QC Record */}
+      {selectedRecordForTest && (
+        <Modal
+          isOpen={Boolean(selectedRecordForTest)}
+          onClose={() => setSelectedRecordForTest(null)}
+          title={`Record Laboratory QC Test: ${selectedRecordForTest.id}`}
+          description={`Testing Monograph for ${selectedRecordForTest.soNumber} • Batch #${selectedRecordForTest.batchNo} (${(selectedRecordForTest.quantityKg / 1000).toFixed(1)} MT)`}
+          size="md"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setSelectedRecordForTest(null)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleRecordTest}>
+                Save & Pass Monograph
+              </Button>
+            </>
+          }
+        >
+          <form onSubmit={handleRecordTest} className="erp-form-grid">
+            <Input
+              label="Product Grade"
+              readOnly
+              value={testForm.productName}
+            />
+            <Input
+              label="Sales Order Ref"
+              readOnly
+              value={testForm.soNumber}
+            />
+            <Input
+              label="Reactor Batch #"
+              readOnly
+              value={testForm.batchNo}
+            />
+            <Input
+              label="Quantity (kg)"
+              type="number"
+              required
+              value={testForm.quantityKg}
+              onChange={(e) => setTestForm({ ...testForm, quantityKg: e.target.value })}
+            />
 
-          <div className="erp-col-span-2">
-            <h4 style={{ fontSize: 'var(--font-size-xs)', textTransform: 'uppercase', color: 'var(--color-text-secondary)', margin: '8px 0 4px' }}>
-              Analytical Monograph Parameters
-            </h4>
-          </div>
+            <div className="erp-col-span-2">
+              <h4 style={{ fontSize: 'var(--font-size-xs)', textTransform: 'uppercase', color: 'var(--color-text-secondary)', margin: '8px 0 4px' }}>
+                Analytical Monograph Testing Parameters
+              </h4>
+            </div>
 
-          <Input
-            label="Assay Purity % (Min 99.7)"
-            value={testForm.p1}
-            onChange={(e) => setTestForm({ ...testForm, p1: e.target.value })}
-          />
-          <Input
-            label="Color APHA (Max 10)"
-            value={testForm.p2}
-            onChange={(e) => setTestForm({ ...testForm, p2: e.target.value })}
-          />
-          <Input
-            label="Heavy Metals ppm (Max 5)"
-            value={testForm.p3}
-            onChange={(e) => setTestForm({ ...testForm, p3: e.target.value })}
-          />
-          <Input
-            label="Water Content % (Max 0.3)"
-            value={testForm.p5}
-            onChange={(e) => setTestForm({ ...testForm, p5: e.target.value })}
-          />
-        </form>
-      </Modal>
+            <Input
+              label="Assay Purity % (Min 99.7)"
+              required
+              value={testForm.p1}
+              onChange={(e) => setTestForm({ ...testForm, p1: e.target.value })}
+            />
+            <Input
+              label="Color APHA (Max 10)"
+              required
+              value={testForm.p2}
+              onChange={(e) => setTestForm({ ...testForm, p2: e.target.value })}
+            />
+            <Input
+              label="Heavy Metals ppm (Max 5)"
+              required
+              value={testForm.p3}
+              onChange={(e) => setTestForm({ ...testForm, p3: e.target.value })}
+            />
+            <Input
+              label="Specific Gravity (1.2612 - 1.2618)"
+              required
+              value={testForm.p4}
+              onChange={(e) => setTestForm({ ...testForm, p4: e.target.value })}
+            />
+            <Input
+              label="Water Content % (Max 0.3)"
+              required
+              value={testForm.p5}
+              onChange={(e) => setTestForm({ ...testForm, p5: e.target.value })}
+            />
+          </form>
+        </Modal>
+      )}
 
       {/* Universal Approval Modal for Failed QC */}
       <ApprovalModal
