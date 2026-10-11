@@ -12,7 +12,7 @@ import { useErp } from '../../hooks/useErp';
 import { Plus, AlertTriangle, Eye, ShieldCheck } from 'lucide-react';
 
 export function QcPage() {
-  const { qcRecords, products, recordQcTest } = useErp();
+  const { qcRecords, products, recordQcTest, passQcRecord, salesOrders } = useErp();
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isNewTestModalOpen, setIsNewTestModalOpen] = useState(false);
   const [approvalModalState, setApprovalModalState] = useState({ isOpen: false, record: null });
@@ -81,7 +81,17 @@ export function QcPage() {
       title: 'Actions',
       align: 'right',
       render: (_, row) => (
-        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+          {row.status === 'pending' && (
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<ShieldCheck size={13} />}
+              onClick={() => passQcRecord(row.id)}
+            >
+              Test & Pass Monograph
+            </Button>
+          )}
           <Button
             size="sm"
             variant="secondary"

@@ -525,61 +525,28 @@ export function SalesPage() {
   return (
     <div>
       <PageHeader
-        title="Sales, Quotations & Export Contracts"
-        description="Workflow: Quotation (SOL/Q/XXXX) → HOD Approval → Sales Order (SOL/SO/XXXX) → Multi-Delivery Tracking (D1, D2)"
+        title="Sales Orders & Customer Contracts"
+        description="Workflow: Sales Order (SOL/SO/XXXX) → HOD Approval → Production, QC/QA, Logistics & Payment"
         actions={
-          <>
-            <Button
-              variant="secondary"
-              icon={<Plus size={15} />}
-              onClick={handleOpenAddQuote}
-            >
-              New Quotation (SOL/Q)
-            </Button>
-            <Button variant="primary" icon={<Plus size={15} />} onClick={handleOpenAddSo}>
-              Direct Sales Order (SOL/SO)
-            </Button>
-          </>
+          <Button variant="primary" icon={<Plus size={15} />} onClick={handleOpenAddSo}>
+            + Direct Sales Order (SOL/SO)
+          </Button>
         }
       />
-
-      {/* Tabs */}
-      <div className="erp-tabs-row">
-        <Button
-          size="sm"
-          variant={activeTab === 'orders' ? 'primary' : 'secondary'}
-          icon={<ShoppingCart size={13} />}
-          onClick={() => setActiveTab('orders')}
-        >
-          Sales Orders (SOL/SO) [{salesOrders.length}]
-        </Button>
-        <Button
-          size="sm"
-          variant={activeTab === 'quotations' ? 'primary' : 'secondary'}
-          icon={<FileText size={13} />}
-          onClick={() => setActiveTab('quotations')}
-        >
-          Commercial Quotations (SOL/Q) [{quotations.length}]
-        </Button>
-      </div>
 
       <FilterBar
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder={activeTab === 'orders' ? 'Search SO # or customer...' : 'Search Quote # or customer...'}
+        searchPlaceholder="Search SO # or customer..."
         onReset={() => {
           setSearch('');
           setStatusFilter('');
         }}
-        totalCount={activeTab === 'orders' ? filteredOrders.length : filteredQuotes.length}
+        totalCount={filteredOrders.length}
       />
 
       <Card noPadding>
-        {activeTab === 'orders' ? (
-          <DataTable columns={soColumns} data={filteredOrders} keyField="id" />
-        ) : (
-          <DataTable columns={quoteColumns} data={filteredQuotes} keyField="id" />
-        )}
+        <DataTable columns={soColumns} data={filteredOrders} keyField="id" />
       </Card>
 
       {/* PDF / Formal View Modal */}

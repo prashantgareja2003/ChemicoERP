@@ -516,7 +516,31 @@ export function ErpProvider({ children }) {
     };
     setLogisticsTasks((prev) => [newLogisticsTask, ...prev]);
 
-    notify(`Sales Order ${id} created and Logistics Inward Work Order auto-triggered.`);
+    // Create Pending QC Test Monograph for the Sales Order
+    const newQcRecord = {
+      id: `QC-REL-26-${Date.now().toString().slice(-4)}`,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      product: soData.items?.[0]?.productName || soData.product || 'Refined Chemical Grade',
+      soNumber: id,
+      batchNo: `B-2610-${Date.now().toString().slice(-3)}`,
+      quantityKg: totalQty * 1000,
+      spec: soData.items?.[0]?.spec || 'USP Monograph Guaranteed',
+      parameters: [
+        { parameter: 'Assay (Purity %)', specification: 'Min 99.7%', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Color (APHA)', specification: 'Max 10 APHA', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Heavy Metals (as Pb)', specification: 'Max 5 ppm', result: 'Pending Lab Run', passed: false },
+        { parameter: 'Water Content', specification: 'Max 0.3%', result: 'Pending Lab Run', passed: false },
+      ],
+      checkedBy: 'Awaiting Lab Testing',
+      status: 'pending',
+      failedDetails: null,
+      history: [
+        { date: new Date().toLocaleString(), user: 'System (Auto Trigger)', action: `QC Test Indent logged for ${id}` },
+      ],
+    };
+    setQcRecords((prev) => [newQcRecord, ...prev]);
+
+    notify(`Sales Order ${id} created, Logistics Task & Lab QC Indent raised.`);
     return newSo;
   }, [getNextNumber, currentUser.name, currentUser.role, notify]);
 
@@ -789,6 +813,40 @@ export function ErpProvider({ children }) {
     return newRecord;
   }, [currentUser.name, currentUser.role, notify]);
 
+  // Pass Pending QC Record (Approves Monograph & Enables Multi-Part Dispatch)
+  const passQcRecord = useCallback((qcId) => {
+    const timestamp = new Date().toLocaleString();
+    let soRef = '';
+    setQcRecords((prev) =>
+      prev.map((qc) => {
+        if (qc.id === qcId) {
+          soRef = qc.soNumber;
+          return {
+            ...qc,
+            status: 'passed',
+            checkedBy: `${currentUser.name} (${currentUser.role})`,
+            parameters: qc.parameters.map((p) => ({
+              ...p,
+              passed: true,
+              result: p.result.includes('Pending') ? (p.specification.includes('Min') ? '99.82%' : p.specification.includes('Max 10') ? '6 APHA' : 'Conforms') : p.result,
+            })),
+            history: [
+              ...(qc.history || []),
+              {
+                date: timestamp,
+                user: `${currentUser.name} (QC Lead)`,
+                action: 'Laboratory test complete: Monograph standards verified and released for dispatch.',
+              },
+            ],
+          };
+        }
+        return qc;
+      })
+    );
+
+    notify(`QC Monograph ${qcId} passed! ${soRef ? `Sales Order ${soRef} is now approved for Multi-Part Dispatch.` : ''}`);
+  }, [currentUser.name, currentUser.role, notify]);
+
   // Logistics Task Updates
   const updateLogisticsTask = useCallback((taskId, stage, updates = {}) => {
     setLogisticsTasks((prev) =>
@@ -875,22 +933,113 @@ export function ErpProvider({ children }) {
     return invoiceId;
   }, [salesOrders, getNextNumber, currentUser.name, notify]);
 
+  // Release Production Delivery (D1 / D2) to Logistics Tanker Dispatch
+  const releaseDeliveryToDispatch = useCallback((soId, deliveryId, reactor = 'Reactor 01 (Fractionation)') => {
+    const so = salesOrders.find((s) => s.id === soId);
+    if (!so) return;
+
+    const delivery = so.deliveries?.find((d) => d.id === deliveryId);
+    const delQty = delivery?.qty || 20;
+
+    // 1. Update SO delivery status
+    setSalesOrders((prev) =>
+      prev.map((s) => {
+        if (s.id === soId) {
+          const updatedDels = s.deliveries?.map((d) =>
+            d.id === deliveryId ? { ...d, status: 'dispatched', reactorVessel: reactor } : d
+          );
+          const allDispatched = updatedDels && updatedDels.length > 0 && updatedDels.every((d) => d.status === 'dispatched' || d.status === 'delivered');
+          return {
+            ...s,
+            status: allDispatched ? 'dispatched' : 'part-delivered',
+            deliveries: updatedDels,
+            history: [
+              ...(s.history || []),
+              {
+                date: new Date().toLocaleString(),
+                user: `${currentUser.name} (Production Manager)`,
+                action: `Part Delivery ${deliveryId} (${delQty} MT) synthesized in ${reactor} and released to Tanker Dispatch`,
+              },
+            ],
+          };
+        }
+        return s;
+      })
+    );
+
+    // 2. Add or update Logistics task
+    setLogisticsTasks((prev) => {
+      const existing = prev.find((t) => t.soNumber === soId && t.deliveryId === deliveryId);
+      if (existing) {
+        return prev.map((t) =>
+          t.id === existing.id
+            ? { ...t, stage: 'dispatched', vehicleNo: t.vehicleNo !== 'TBD' ? t.vehicleNo : 'GJ-16-AX-8921' }
+            : t
+        );
+      } else {
+        const newTask = {
+          id: `LOG-TSK-${Date.now().toString().slice(-3)}`,
+          soNumber: soId,
+          deliveryId: deliveryId,
+          consignee: so.consignee || so.customerName || 'Consignee',
+          productName: so.items?.[0]?.productName || so.product || 'Refined Chemical Grade',
+          weightMT: delQty,
+          hsn: so.items?.[0]?.hsn || '29054500',
+          packaging: so.items?.[0]?.packaging || so.packaging || 'Bulk Road Tanker',
+          containerType: so.containerType || '20ft ISO Tank / FCL',
+          stuffingDate: new Date().toLocaleDateString('en-GB'),
+          pol: so.portOfLoading || 'Dahej Port / JNPT',
+          pod: so.portOfDelivery || 'Customer Destination',
+          outwardTask: {
+            outwardDate: new Date().toLocaleDateString('en-GB'),
+            line: 'SafeChem Bulk Carriers',
+            rateFreight: '₹18,000/run',
+            vesselName: 'Tanker GJ-16-AX-8921',
+            gateOpen: '07:00 AM',
+            cutOff: '11:00 AM',
+            loadingDate: new Date().toLocaleDateString('en-GB'),
+            bol: `BOL-${soId.replace(/[^0-9]/g, '')}-${deliveryId}`,
+            sob: 'SOB-CONFIRMED',
+          },
+          stage: 'dispatched',
+          vehicleNo: 'GJ-16-AX-8921',
+          driverContact: '+91 98251 44921',
+          podUploaded: false,
+          history: [
+            {
+              date: new Date().toLocaleString(),
+              user: `${currentUser.name} (Production Output)`,
+              action: `Part Delivery ${deliveryId} (${delQty} MT) received from Plant Reactor and dispatched`,
+            },
+          ],
+        };
+        return [newTask, ...prev];
+      }
+    });
+
+    notify(`Part Delivery ${deliveryId} (${delQty} MT) synthesized & released to Tanker Logistics Dispatch!`);
+  }, [salesOrders, currentUser.name, notify]);
+
   // Payment Recording & 95% Completion Rule
   const recordPayment = useCallback((type, orderId, amount, receiptRef) => {
     const numAmount = Number(amount || 0);
 
     if (type === 'sales_order') {
+      const so = salesOrders.find((s) => s.id === orderId);
+      const totalVal = so?.totalValue || 1;
+      const newReceived = (so?.receivedPayment || 0) + numAmount;
+      const pct = (newReceived / totalVal) * 100;
+      const isFull = pct >= 95;
+
       setSalesOrders((prev) =>
-        prev.map((so) => {
-          if (so.id === orderId) {
-            const newReceived = (so.receivedPayment || 0) + numAmount;
-            const pct = (newReceived / so.totalValue) * 100;
+        prev.map((s) => {
+          if (s.id === orderId) {
             return {
-              ...so,
+              ...s,
               receivedPayment: newReceived,
-              status: pct >= 95 ? (so.status === 'completed' ? 'completed' : 'paid') : so.status,
+              status: isFull ? (s.status === 'completed' ? 'completed' : 'paid') : s.status,
               history: [
-                ...so.history,
+                ...(s.history || []),
                 {
                   date: new Date().toLocaleString(),
                   user: `${currentUser.name} (Finance)`,
@@ -899,21 +1048,71 @@ export function ErpProvider({ children }) {
               ],
             };
           }
-          return so;
+          return s;
         })
       );
+
+      // Update linked GST Invoices status
+      setInvoices((prev) =>
+        prev.map((inv) => {
+          if (inv.soNumber === orderId) {
+            return {
+              ...inv,
+              status: isFull ? 'paid' : 'partially paid',
+              paymentReceived: isFull ? (inv.totalWithTax || inv.subTotal) : ((inv.paymentReceived || 0) + numAmount),
+            };
+          }
+          return inv;
+        })
+      );
+    } else if (type === 'invoice') {
+      const inv = invoices.find((i) => i.id === orderId);
+      const linkedSoId = inv?.soNumber;
+      const invTotal = inv?.totalWithTax || inv?.subTotal || 1;
+      const newInvRec = (inv?.paymentReceived || 0) + numAmount;
+      const isInvPaid = newInvRec >= invTotal * 0.95;
+
+      setInvoices((prev) =>
+        prev.map((i) => {
+          if (i.id === orderId) {
+            return {
+              ...i,
+              paymentReceived: newInvRec,
+              status: isInvPaid ? 'paid' : 'partially paid',
+            };
+          }
+          return i;
+        })
+      );
+
+      if (linkedSoId) {
+        setSalesOrders((prev) =>
+          prev.map((s) => {
+            if (s.id === linkedSoId) {
+              const newRec = (s.receivedPayment || 0) + numAmount;
+              const pct = (newRec / (s.totalValue || 1)) * 100;
+              return {
+                ...s,
+                receivedPayment: newRec,
+                status: pct >= 95 ? (s.status === 'completed' ? 'completed' : 'paid') : s.status,
+              };
+            }
+            return s;
+          })
+        );
+      }
     } else if (type === 'purchase_order') {
       setPurchaseOrders((prev) =>
         prev.map((po) => {
           if (po.id === orderId) {
             const newPaid = (po.paidAmount || 0) + numAmount;
-            const pct = (newPaid / (po.totalWithTax || po.totalValue)) * 100;
+            const pct = (newPaid / (po.totalWithTax || po.totalValue || 1)) * 100;
             return {
               ...po,
               paidAmount: newPaid,
               status: pct >= 95 ? (po.status === 'completed' ? 'completed' : 'settled') : po.status,
               history: [
-                ...po.history,
+                ...(po.history || []),
                 {
                   date: new Date().toLocaleString(),
                   user: `${currentUser.name} (Finance)`,
@@ -1080,6 +1279,8 @@ export function ErpProvider({ children }) {
         updatePurchaseOrder,
         handleUniversalApproval,
         recordQcTest,
+        passQcRecord,
+        releaseDeliveryToDispatch,
         updateLogisticsTask,
         generateInvoice,
         recordPayment,

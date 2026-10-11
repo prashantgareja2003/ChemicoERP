@@ -529,6 +529,141 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {/* Admin Order Lifecycle Phase Visibility (Production / Transportation / Payment) */}
+      <div
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '12px 16px',
+          marginBottom: 'var(--space-4)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <strong style={{ fontSize: '0.8125rem', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <LayoutDashboard size={14} /> Admin Order Lifecycle Phase Monitor
+          </strong>
+          <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>
+            Orders Phase Visibility: Production ➔ Transportation ➔ Payment ➔ Completed
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+          {/* Phase 1: Production */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              background: '#FFF7ED',
+              border: '1px solid #FFEDD5',
+              cursor: 'pointer',
+            }}
+            onClick={() =>
+              setDrilldownData({
+                title: 'Orders in Production Phase',
+                records: salesOrders.filter((s) => s.status === 'in production'),
+                type: 'sales',
+              })
+            }
+          >
+            <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#C2410C', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Factory size={13} /> In Production Phase
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#9A3412', marginTop: 2 }}>
+              {salesOrders.filter((s) => s.status === 'in production').length} Orders
+            </div>
+            <div style={{ fontSize: '0.625rem', color: '#EA580C' }}>
+              Reactor synthesis & yield
+            </div>
+          </div>
+
+          {/* Phase 2: Transportation / Dispatch */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              background: '#F0F9FF',
+              border: '1px solid #E0F2FE',
+              cursor: 'pointer',
+            }}
+            onClick={() =>
+              setDrilldownData({
+                title: 'Orders in Transportation / Dispatch Phase',
+                records: salesOrders.filter((s) => s.status === 'part-delivered' || s.status === 'delivered'),
+                type: 'sales',
+              })
+            }
+          >
+            <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#0369A1', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Truck size={13} /> In Transportation Phase
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#075985', marginTop: 2 }}>
+              {salesOrders.filter((s) => s.status === 'part-delivered' || s.status === 'delivered').length} Orders
+            </div>
+            <div style={{ fontSize: '0.625rem', color: '#0284C7' }}>
+              Tankers dispatched & tracking
+            </div>
+          </div>
+
+          {/* Phase 3: Payment & Invoicing */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              background: '#FAF5FF',
+              border: '1px solid #F3E8FF',
+              cursor: 'pointer',
+            }}
+            onClick={() =>
+              setDrilldownData({
+                title: 'Orders in Payment & Invoicing Phase',
+                records: salesOrders.filter((s) => s.status === 'invoiced' || (s.status !== 'completed' && s.status !== 'open' && s.status !== 'in production')),
+                type: 'sales',
+              })
+            }
+          >
+            <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#7E22CE', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Receipt size={13} /> In Payment Phase
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#6B21A8', marginTop: 2 }}>
+              {salesOrders.filter((s) => s.status === 'invoiced' || (s.status !== 'completed' && s.status !== 'open' && s.status !== 'in production')).length} Orders
+            </div>
+            <div style={{ fontSize: '0.625rem', color: '#9333EA' }}>
+              Pending ≥95% settlement
+            </div>
+          </div>
+
+          {/* Phase 4: Completed */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              background: '#F0FDF4',
+              border: '1px solid #DCFCE7',
+              cursor: 'pointer',
+            }}
+            onClick={() =>
+              setDrilldownData({
+                title: 'Settled & Completed Orders',
+                records: salesOrders.filter((s) => s.status === 'completed'),
+                type: 'sales',
+              })
+            }
+          >
+            <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#15803D', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <CheckCircle2 size={13} /> SO Completed (≥95%)
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#166534', marginTop: 2 }}>
+              {salesOrders.filter((s) => s.status === 'completed').length} Orders
+            </div>
+            <div style={{ fontSize: '0.625rem', color: '#16A34A' }}>
+              Fully closed & settled
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Grid: Orders & Approval Queue matching screenshot */}
       <div className="erp-grid-2col">
         {/* Left: Recent Sales & Dispatch Execution Table */}

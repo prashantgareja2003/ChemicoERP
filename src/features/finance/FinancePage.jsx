@@ -99,7 +99,15 @@ export function FinancePage() {
     {
       key: 'status',
       title: 'Payment Status',
-      render: (val) => <StatusBadge status={val} />,
+      render: (val, row) => {
+        const linkedSo = salesOrders.find((s) => s.id === row.soNumber);
+        const soPaidPct = linkedSo ? Math.round(((linkedSo.receivedPayment || 0) / (linkedSo.totalValue || 1)) * 100) : 0;
+        const isPaid = val === 'paid' || row.status === 'paid' || soPaidPct >= 95;
+        const isPartial = val === 'partially paid' || row.status === 'partially paid' || soPaidPct > 0 || (row.paymentReceived || 0) > 0;
+        const effectiveStatus = isPaid ? 'paid' : isPartial ? 'partially paid' : 'pending';
+
+        return <StatusBadge status={effectiveStatus} />;
+      },
     },
     {
       key: 'actions',
@@ -480,19 +488,41 @@ export function FinancePage() {
           <Select
             label="Transaction Type"
             value={paymentForm.type}
-            onChange={(e) => setPaymentForm({ ...paymentForm, type: e.target.value })}
+            onChange={(e) => {
+              const newType = e.target.value;
+              const defaultId = newType === 'sales_order' ? (salesOrders[0]?.id || '') : newType === 'invoice' ? (invoices[0]?.id || '') : (purchaseOrders[0]?.id || '');
+              const defAmt = newType === 'sales_order' ? (salesOrders[0]?.totalValue || '') : newType === 'invoice' ? (invoices[0]?.totalWithTax || '') : (purchaseOrders[0]?.totalValue || '');
+              setPaymentForm({ ...paymentForm, type: newType, orderId: defaultId, amount: defAmt });
+            }}
             options={[
               { value: 'sales_order', label: 'Customer Payment (against Sales Order)' },
+              { value: 'invoice', label: 'Customer Payment (against Specific Tax Invoice)' },
               { value: 'purchase_order', label: 'Supplier Payout (against Purchase Order)' },
             ]}
           />
           <Select
-            label="Order Reference #"
+            label={paymentForm.type === 'invoice' ? 'Select GST Tax Invoice #' : 'Order Reference #'}
             value={paymentForm.orderId}
-            onChange={(e) => setPaymentForm({ ...paymentForm, orderId: e.target.value })}
+            onChange={(e) => {
+              const selId = e.target.value;
+              let newAmt = paymentForm.amount;
+              if (paymentForm.type === 'sales_order') {
+                const matched = salesOrders.find(s => s.id === selId);
+                if (matched) newAmt = matched.totalValue;
+              } else if (paymentForm.type === 'invoice') {
+                const matched = invoices.find(i => i.id === selId);
+                if (matched) newAmt = matched.totalWithTax;
+              } else {
+                const matched = purchaseOrders.find(p => p.id === selId);
+                if (matched) newAmt = matched.totalWithTax || matched.totalValue;
+              }
+              setPaymentForm({ ...paymentForm, orderId: selId, amount: newAmt });
+            }}
             options={
               paymentForm.type === 'sales_order'
-                ? salesOrders.map((s) => ({ value: s.id, label: `${s.id} — ${s.customerName}` }))
+                ? salesOrders.map((s) => ({ value: s.id, label: `${s.id} — ${s.customerName} [₹${Number(s.totalValue || 0).toLocaleString()}]` }))
+                : paymentForm.type === 'invoice'
+                ? invoices.map((inv) => ({ value: inv.id, label: `${inv.id} — ${inv.customerName} (${inv.soNumber} ${inv.deliveryId}) [₹${Number(inv.totalWithTax || 0).toLocaleString()}]` }))
                 : purchaseOrders.map((p) => ({ value: p.id, label: `${p.id} — ${p.supplierName}` }))
             }
           />
