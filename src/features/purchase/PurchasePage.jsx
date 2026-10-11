@@ -61,40 +61,8 @@ export function PurchasePage() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentRef, setPaymentRef] = useState('');
 
-  // Edit PO State
-  const [editingPo, setEditingPo] = useState(null);
-  const [poEditForm, setPoEditForm] = useState({
-    qty: 120,
-    unitPrice: 29000,
-    deliverySchedule: '',
-    creditPeriod: '',
-    deliveryPoint: '',
-  });
-
-  const handleOpenEditPo = (row) => {
-    setEditingPo(row);
-    setPoEditForm({
-      qty: row.qty || 120,
-      unitPrice: row.unitPrice || 29000,
-      deliverySchedule: row.deliverySchedule || 'Within 7 Days',
-      creditPeriod: row.creditPeriod || '30 Days Net',
-      deliveryPoint: row.deliveryPoint || 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
-    });
-  };
-
-  const handleSavePoEdit = () => {
-    if (!editingPo) return;
-    updatePurchaseOrder(editingPo.id, {
-      qty: Number(poEditForm.qty),
-      unitPrice: Number(poEditForm.unitPrice),
-      deliverySchedule: poEditForm.deliverySchedule,
-      creditPeriod: poEditForm.creditPeriod,
-      deliveryPoint: poEditForm.deliveryPoint,
-    });
-    setEditingPo(null);
-  };
-
-  // PO Form
+  // PO Form & Unified Modal State (Add & Edit)
+  const [editingPoId, setEditingPoId] = useState(null);
   const [poForm, setPoForm] = useState({
     supplierId: '',
     material: '',
@@ -109,6 +77,76 @@ export function PurchasePage() {
     deliveryPoint: 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
     refSoNumber: 'SOL/SO/2891',
   });
+
+  const handleOpenAddPo = () => {
+    setEditingPoId(null);
+    const defaultSup = suppliers[0] || {};
+    setPoForm({
+      supplierId: defaultSup.id || '',
+      material: defaultSup.productSupplied || 'Caustic Soda Lye 48%',
+      spec: 'Membrane Cell Grade 48% NaOH',
+      hsn: '28151200',
+      qty: 120,
+      uom: 'MT',
+      unitPrice: 29000,
+      taxPercent: 18,
+      deliverySchedule: 'Within 7 Days',
+      creditPeriod: '30 Days Net',
+      deliveryPoint: 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
+      refSoNumber: 'SOL/SO/2891',
+    });
+    setIsPoModalOpen(true);
+  };
+
+  const handleOpenEditPo = (row) => {
+    setEditingPoId(row.id);
+    const matchedSup = suppliers.find((s) => s.id === row.supplierId || s.companyName === row.supplierName) || suppliers[0];
+    setPoForm({
+      supplierId: row.supplierId || matchedSup?.id || '',
+      material: row.material || matchedSup?.productSupplied || '',
+      spec: row.spec || 'Membrane Cell Grade 48% NaOH',
+      hsn: row.hsn || '28151200',
+      qty: row.qty || 120,
+      uom: row.uom || 'MT',
+      unitPrice: row.unitPrice || 29000,
+      taxPercent: row.taxPercent || 18,
+      deliverySchedule: row.deliverySchedule || 'Within 7 Days',
+      creditPeriod: row.creditPeriod || '30 Days Net',
+      deliveryPoint: row.deliveryPoint || 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
+      refSoNumber: row.refSoNumber || '',
+    });
+    setIsPoModalOpen(true);
+  };
+
+  const handleSubmitPo = (e) => {
+    if (e) e.preventDefault();
+    const supp = suppliers.find((s) => s.id === poForm.supplierId) || suppliers[0];
+
+    if (editingPoId) {
+      updatePurchaseOrder(editingPoId, {
+        ...poForm,
+        qty: Number(poForm.qty),
+        unitPrice: Number(poForm.unitPrice),
+        supplierId: supp?.id,
+        supplierName: supp?.companyName,
+        gstin: supp?.gstin,
+        address: supp?.address,
+      });
+    } else {
+      createPurchaseOrder({
+        ...poForm,
+        qty: Number(poForm.qty),
+        unitPrice: Number(poForm.unitPrice),
+        supplierId: supp?.id,
+        supplierName: supp?.companyName,
+        gstin: supp?.gstin,
+        address: supp?.address,
+      });
+    }
+
+    setIsPoModalOpen(false);
+    setEditingPoId(null);
+  };
 
   // Inward receipt modal form
   const [inwardQty, setInwardQty] = useState('');
@@ -174,20 +212,6 @@ export function PurchasePage() {
     return matchesSearch && matchesStage;
   });
 
-  const handleCreatePo = (e) => {
-    e.preventDefault();
-    const supp = suppliers.find((s) => s.id === poForm.supplierId) || suppliers[0];
-
-    createPurchaseOrder({
-      ...poForm,
-      supplierId: supp.id,
-      supplierName: supp.companyName,
-      gstin: supp.gstin,
-      address: supp.address,
-    });
-
-    setIsPoModalOpen(false);
-  };
 
   const handleBookInward = () => {
     if (!inwardModalPo) return;
@@ -467,7 +491,7 @@ export function PurchasePage() {
           <Button
             variant="primary"
             icon={<Plus size={15} />}
-            onClick={() => setIsPoModalOpen(true)}
+            onClick={handleOpenAddPo}
           >
             New Purchase Order (SOL/PO)
           </Button>
@@ -613,23 +637,38 @@ export function PurchasePage() {
         </Modal>
       )}
 
-      {/* New PO Modal */}
+      {/* Unified Purchase Order Modal (Add & Edit) */}
       <Modal
         isOpen={isPoModalOpen}
-        onClose={() => setIsPoModalOpen(false)}
-        title="Raise Raw Material Purchase Order (SOL/PO)"
-        description="Generates incremental SOL/PO series and routes for mandatory HOD review."
+        onClose={() => {
+          setIsPoModalOpen(false);
+          setEditingPoId(null);
+        }}
+        title={editingPoId ? `Edit Purchase Order: ${editingPoId}` : 'Raise Raw Material Purchase Order (SOL/PO)'}
+        description={
+          editingPoId
+            ? 'Update purchase order indent volume, rate per MT, raw material specs, delivery schedule, and credit terms.'
+            : 'Generates incremental SOL/PO series and routes for mandatory HOD review.'
+        }
         size="md"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setIsPoModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleCreatePo}>
-              Submit PO for HOD Sign-off
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setIsPoModalOpen(false);
+                setEditingPoId(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSubmitPo}>
+              {editingPoId ? 'Save Changes' : 'Submit PO for HOD Sign-off'}
             </Button>
           </>
         }
       >
-        <form onSubmit={handleCreatePo} className="erp-form-grid">
+        <form onSubmit={handleSubmitPo} className="erp-form-grid">
           <div className="erp-col-span-2">
             <Select
               label="Select Supplier (from Master)"
@@ -648,13 +687,23 @@ export function PurchasePage() {
           </div>
 
           <Input
-            label="Material Description"
+            label="Raw Material Description"
             required
             value={poForm.material}
             onChange={(e) => setPoForm({ ...poForm, material: e.target.value })}
           />
           <Input
-            label="Quantity (MT)"
+            label="Specification / Grade"
+            value={poForm.spec}
+            onChange={(e) => setPoForm({ ...poForm, spec: e.target.value })}
+          />
+          <Input
+            label="HSN Code"
+            value={poForm.hsn}
+            onChange={(e) => setPoForm({ ...poForm, hsn: e.target.value })}
+          />
+          <Input
+            label="Indent Volume (MT)"
             type="number"
             required
             value={poForm.qty}
@@ -668,9 +717,30 @@ export function PurchasePage() {
             onChange={(e) => setPoForm({ ...poForm, unitPrice: e.target.value })}
           />
           <Input
-            label="Delivery Point / Ship-to"
+            label="GST Tax Rate (%)"
+            type="number"
+            value={poForm.taxPercent}
+            onChange={(e) => setPoForm({ ...poForm, taxPercent: e.target.value })}
+          />
+          <Input
+            label="Delivery Schedule"
+            value={poForm.deliverySchedule}
+            onChange={(e) => setPoForm({ ...poForm, deliverySchedule: e.target.value })}
+          />
+          <Input
+            label="Credit Period"
+            value={poForm.creditPeriod}
+            onChange={(e) => setPoForm({ ...poForm, creditPeriod: e.target.value })}
+          />
+          <Input
+            label="Delivery Point / Silo"
             value={poForm.deliveryPoint}
             onChange={(e) => setPoForm({ ...poForm, deliveryPoint: e.target.value })}
+          />
+          <Input
+            label="Linked Reference Sales Order (SOL/SO)"
+            value={poForm.refSoNumber}
+            onChange={(e) => setPoForm({ ...poForm, refSoNumber: e.target.value })}
           />
         </form>
       </Modal>
@@ -682,61 +752,6 @@ export function PurchasePage() {
         targetType="purchase_order"
         record={approvalModalState.record}
       />
-
-      {/* Edit Purchase Order Modal */}
-      <Modal
-        isOpen={Boolean(editingPo)}
-        onClose={() => setEditingPo(null)}
-        title={editingPo ? `Edit Purchase Order: ${editingPo.id}` : 'Edit Purchase Order'}
-        description="Update purchase order indent volume, rate per MT, delivery schedule, and credit terms."
-        size="md"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setEditingPo(null)}>Cancel</Button>
-            <Button variant="primary" onClick={handleSavePoEdit}>Save Changes</Button>
-          </>
-        }
-      >
-        <div className="erp-form-grid">
-          <Input
-            label="Supplier Company"
-            disabled
-            value={editingPo?.supplierName || ''}
-          />
-          <Input
-            label="Raw Material"
-            disabled
-            value={editingPo?.material || ''}
-          />
-          <Input
-            label="Indent Volume (MT)"
-            type="number"
-            value={poEditForm.qty}
-            onChange={(e) => setPoEditForm({ ...poEditForm, qty: e.target.value })}
-          />
-          <Input
-            label="Unit Rate / MT (INR)"
-            type="number"
-            value={poEditForm.unitPrice}
-            onChange={(e) => setPoEditForm({ ...poEditForm, unitPrice: e.target.value })}
-          />
-          <Input
-            label="Delivery Schedule"
-            value={poEditForm.deliverySchedule}
-            onChange={(e) => setPoEditForm({ ...poEditForm, deliverySchedule: e.target.value })}
-          />
-          <Input
-            label="Credit Period"
-            value={poEditForm.creditPeriod}
-            onChange={(e) => setPoEditForm({ ...poEditForm, creditPeriod: e.target.value })}
-          />
-          <Input
-            label="Delivery Point / Silo"
-            value={poEditForm.deliveryPoint}
-            onChange={(e) => setPoEditForm({ ...poEditForm, deliveryPoint: e.target.value })}
-          />
-        </div>
-      </Modal>
 
       {/* Record Supplier Bill Receipt Modal (Stage 4) */}
       <Modal

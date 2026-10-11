@@ -558,12 +558,17 @@ export function ErpProvider({ children }) {
     setQuotations((prev) =>
       prev.map((q) => {
         if (q.id === id) {
-          const qty = Number(updatedFields.qty ?? q.qty);
-          const unitPrice = Number(updatedFields.unitPrice ?? q.unitPrice);
-          const totalValue = qty * unitPrice;
+          const items = updatedFields.items || q.items;
+          const itemsTotal = items ? items.reduce((sum, it) => sum + (Number(it.total) || (Number(it.qty || 0) * Number(it.unitPrice || 0))), 0) : null;
+          const itemsQty = items ? items.reduce((sum, it) => sum + Number(it.qty || 0), 0) : null;
+          const qty = Number(updatedFields.qty ?? itemsQty ?? q.qty ?? 1);
+          const unitPrice = Number(updatedFields.unitPrice ?? (items && items[0]?.unitPrice) ?? q.unitPrice ?? 0);
+          const totalValue = Number(updatedFields.totalValue ?? itemsTotal ?? (qty * unitPrice));
           return {
             ...q,
             ...updatedFields,
+            items: items || q.items,
+            product: updatedFields.product || (items && items[0]?.productName) || q.product,
             qty,
             unitPrice,
             totalValue,
@@ -588,16 +593,22 @@ export function ErpProvider({ children }) {
     setSalesOrders((prev) =>
       prev.map((so) => {
         if (so.id === id) {
-          const qty = Number(updatedFields.quantity ?? updatedFields.qty ?? so.quantity ?? so.qty ?? 1);
-          const rate = Number(updatedFields.rate ?? updatedFields.unitPrice ?? so.rate ?? so.unitPrice ?? 0);
-          const basic = qty * rate;
+          const items = updatedFields.items || so.items;
+          const itemsTotal = items ? items.reduce((sum, it) => sum + (Number(it.total) || (Number(it.qty || it.quantity || 0) * Number(it.unitPrice || it.rate || 0))), 0) : null;
+          const itemsQty = items ? items.reduce((sum, it) => sum + Number(it.qty || it.quantity || 0), 0) : null;
+          const qty = Number(updatedFields.quantity ?? updatedFields.qty ?? itemsQty ?? so.quantity ?? so.qty ?? 1);
+          const rate = Number(updatedFields.rate ?? updatedFields.unitPrice ?? (items && items[0] ? (items[0].unitPrice || items[0].rate) : null) ?? so.rate ?? so.unitPrice ?? 0);
+          const basic = Number(updatedFields.totalValue ?? itemsTotal ?? (qty * rate));
           const tax = basic * 0.18;
           const totalWithTax = basic + tax;
           return {
             ...so,
             ...updatedFields,
+            items: items || so.items,
+            product: updatedFields.product || (items && items[0]?.productName) || so.product,
             quantity: qty,
             rate,
+            totalValue: basic,
             basicValue: basic,
             taxAmount: tax,
             totalWithTax,
