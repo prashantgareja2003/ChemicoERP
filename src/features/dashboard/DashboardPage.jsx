@@ -5,6 +5,9 @@ import Button from '../../components/ui/Button';
 import DataTable from '../../components/ui/DataTable';
 import StatusBadge from '../../components/common/StatusBadge';
 import ApprovalModal from '../../components/common/ApprovalModal';
+import GatePassModal from '../../components/common/GatePassModal';
+import DocumentPdfModal from '../../components/common/DocumentPdfModal';
+import DashboardCharts from '../../components/common/DashboardCharts';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
@@ -26,6 +29,10 @@ import {
   Truck,
   Receipt,
   CheckCircle2,
+  FileText,
+  Printer,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
 export function DashboardPage() {
@@ -35,13 +42,19 @@ export function DashboardPage() {
     salesOrders,
     purchaseOrders,
     qcRecords,
+    logisticsTasks,
     products,
     customers,
     createQuotation,
+    convertQuotationToSalesOrder,
     notify,
   } = useErp();
 
   const [userSelectedTab, setUserSelectedTab] = useState(null);
+  const [isGatePassModalOpen, setIsGatePassModalOpen] = useState(false);
+  const [selectedGatePassConsignment, setSelectedGatePassConsignment] = useState(null);
+  const [selectedQuoteForPdf, setSelectedQuoteForPdf] = useState(null);
+  const [quoteFilter, setQuoteFilter] = useState('all');
 
   // Default dashboard cleanly derived from active stakeholder role
   const defaultTabForRole = useMemo(() => {
@@ -288,7 +301,186 @@ export function DashboardPage() {
         </span>
       ),
     },
+    {
+      key: 'actions',
+      title: 'ACTIONS',
+      align: 'right',
+      render: (_, row) => (
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+          {row.status === 'Dispatched' ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={<Printer size={12} />}
+              onClick={() => {
+                setSelectedGatePassConsignment({
+                  id: `GP-${row.id?.replace(/[^0-9]/g, '') || '26-8921'}`,
+                  soNumber: row.id,
+                  deliveryId: 'D1',
+                  client: row.client,
+                  consignee: `${row.client}, Plant Unit #2, Vapi, Gujarat`,
+                  product: row.product,
+                  spec: row.spec,
+                  volume: row.volume,
+                  weightMT: parseInt(row.volume) || 24,
+                  vehicleNo: 'GJ-16-AX-8921',
+                  driverName: 'Rameshwar B. Patel',
+                  driverContact: '+91 98251 44921',
+                  driverLicense: 'GJ16-2018-009124',
+                  transporter: 'SafeChem Bulk Carriers Ltd',
+                  grossWeightKg: 38280,
+                  tareWeightKg: 14280,
+                  netWeightKg: 24000,
+                  sealTop: 'SC-9912A',
+                  sealBottom: 'SC-9912B',
+                  inTime: '07:15 AM',
+                  outTime: '10:30 AM',
+                  gateNo: 'Security Gate #2 (Tanker Bay)',
+                  ewayBill: '2410 8829 4410',
+                  invoiceNo: 'INV-2026-1082',
+                });
+                setIsGatePassModalOpen(true);
+              }}
+            >
+              Gate Pass
+            </Button>
+          ) : (
+            <span style={{ fontSize: '0.6875rem', color: '#94A3B8' }}>—</span>
+          )}
+        </div>
+      ),
+    },
   ];
+
+  // Quotations Dashboard Table Columns
+  const quotationDashboardColumns = [
+    {
+      key: 'id',
+      title: 'QUOTATION #',
+      render: (val) => (
+        <span
+          style={{
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            color: 'var(--color-primary-dark)',
+            background: 'var(--color-primary-light)',
+            padding: '2px 6px',
+            borderRadius: 4,
+          }}
+        >
+          {val}
+        </span>
+      ),
+    },
+    {
+      key: 'client',
+      title: 'CLIENT / CONSIGNEE',
+      render: (_, row) => (
+        <div>
+          <strong style={{ color: '#0F172A', fontSize: '0.8125rem' }}>
+            {row.customerName || row.client || '—'}
+          </strong>
+          <div style={{ fontSize: '0.6875rem', color: '#64748B' }}>
+            {row.consignee || 'Consignee Plant Delivery'}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'product',
+      title: 'CHEMICAL GRADE',
+      render: (_, row) => {
+        const item = row.items?.[0];
+        return (
+          <div>
+            <div style={{ fontWeight: 600, color: '#0F172A' }}>
+              {item?.productName || row.product || 'Refined Chemical Grade'}
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: '#64748B' }}>
+              {item?.spec || row.spec || 'Standard Guaranteed Spec'}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'volume',
+      title: 'VOLUME',
+      align: 'right',
+      render: (_, row) => {
+        const item = row.items?.[0];
+        const qty = item?.qty || row.qty || row.volume || 20;
+        return <strong style={{ color: '#334155' }}>{qty} MT</strong>;
+      },
+    },
+    {
+      key: 'value',
+      title: 'TOTAL VALUE',
+      align: 'right',
+      render: (_, row) => {
+        const val =
+          row.totalValue ||
+          (Number(row.qty || row.items?.[0]?.qty || 1) *
+            Number(row.unitPrice || row.items?.[0]?.unitPrice || 0));
+        return <strong style={{ color: '#065F46' }}>₹{Number(val).toLocaleString()}</strong>;
+      },
+    },
+    {
+      key: 'status',
+      title: 'STATUS',
+      render: (val) => <StatusBadge status={val} />,
+    },
+    {
+      key: 'actions',
+      title: 'ACTIONS',
+      align: 'right',
+      render: (_, row) => (
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Button
+            size="sm"
+            variant="secondary"
+            icon={<Printer size={13} />}
+            onClick={() => setSelectedQuoteForPdf(row)}
+          >
+            Download / Print PDF
+          </Button>
+
+          {row.status === 'approved' && (
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<ArrowRight size={13} />}
+              onClick={() => convertQuotationToSalesOrder(row.id)}
+            >
+              Convert to SO
+            </Button>
+          )}
+
+          {row.status === 'awaiting approval' && (
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<CheckCircle2 size={13} />}
+              onClick={() =>
+                setApprovalModalState({
+                  isOpen: true,
+                  targetType: 'quotation',
+                  record: row,
+                })
+              }
+            >
+              HOD Sign-off
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  const filteredQuotationsList = useMemo(() => {
+    if (quoteFilter === 'all') return quotations;
+    return quotations.filter((q) => q.status === quoteFilter);
+  }, [quotations, quoteFilter]);
 
   return (
     <div>
@@ -300,7 +492,8 @@ export function DashboardPage() {
           <>
             <Button
               variant="secondary"
-              onClick={() => notify('Gate pass print manifest generated.')}
+              icon={<Printer size={15} />}
+              onClick={() => setIsGatePassModalOpen(true)}
             >
               Print Gate Pass
             </Button>
@@ -315,17 +508,18 @@ export function DashboardPage() {
         }
       />
 
-      {/* 8-Dashboard Specialized Tabs with Icons & Colors */}
+      {/* 9-Dashboard Specialized Tabs with Icons & Colors including Quotations */}
       <div className="erp-dash-pill-group">
         {[
-          { key: 'Management', label: 'Management Dashboard', icon: LayoutDashboard, color: '#2563EB' },
-          { key: 'Sales', label: 'Sales Dashboard', icon: ShoppingCart, color: '#0D9488' },
-          { key: 'Stock', label: 'Stock Dashboard', icon: Boxes, color: '#4F46E5' },
-          { key: 'Production & Quality', label: 'Production & Quality Dashboard', icon: Factory, color: '#EA580C' },
-          { key: 'Purchase', label: 'Purchase Dashboard', icon: ShoppingBag, color: '#D97706' },
-          { key: 'Dispatch', label: 'Dispatch Dashboard', icon: Truck, color: '#0284C7' },
-          { key: 'Finance', label: 'Finance Dashboard', icon: Receipt, color: '#059669' },
-          { key: 'Approvals', label: 'Approvals Dashboard', icon: CheckCircle2, color: '#16A34A' },
+          { key: 'Management', label: 'Management', icon: LayoutDashboard, color: '#2563EB' },
+          { key: 'Sales', label: 'Sales Orders', icon: ShoppingCart, color: '#0D9488' },
+          { key: 'Quotations', label: 'Quotations', icon: FileText, color: '#7C3AED' },
+          { key: 'Stock', label: 'Stock & Inventory', icon: Boxes, color: '#4F46E5' },
+          { key: 'Production & Quality', label: 'Production & QC', icon: Factory, color: '#EA580C' },
+          { key: 'Purchase', label: 'Purchase & Inward', icon: ShoppingBag, color: '#D97706' },
+          { key: 'Dispatch', label: 'Tanker Dispatch', icon: Truck, color: '#0284C7' },
+          { key: 'Finance', label: 'Finance & Accounts', icon: Receipt, color: '#059669' },
+          { key: 'Approvals', label: 'Approvals Queue', icon: CheckCircle2, color: '#16A34A' },
         ].map((tab) => {
           const isActive = activeDashboard === tab.key;
           const IconComponent = tab.icon;
@@ -358,7 +552,193 @@ export function DashboardPage() {
         })}
       </div>
 
-      {/* 4 Clean Metric Cards with Colorful Icons */}
+      {/* Conditional Dashboard View: Quotations Dashboard vs Standard Operations Deck */}
+      {activeDashboard === 'Quotations' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          {/* 4 Clean Metric Cards for Quotations */}
+          <div className="erp-grid-kpi">
+            <div className="erp-metric-card-clean">
+              <div className="erp-metric-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 26,
+                      height: 26,
+                      borderRadius: 6,
+                      background: '#F3E8FF',
+                      color: '#7C3AED',
+                      border: '1px solid #DDD6FE',
+                    }}
+                  >
+                    <FileText size={14} strokeWidth={2.4} />
+                  </span>
+                  <span className="erp-metric-label-clean">Total Quotations</span>
+                </div>
+                <span className="erp-metric-pill erp-metric-pill-blue">SOL/Q Series</span>
+              </div>
+              <div className="erp-metric-value-clean">{quotations.length} Bids</div>
+              <div className="erp-metric-subline">
+                <span>Active Commercial Offers</span>
+                <span style={{ color: '#7C3AED', fontWeight: 600 }}>Dahej Plant</span>
+              </div>
+            </div>
+
+            <div
+              className="erp-metric-card-clean"
+              style={{ border: '1.5px solid #10B981', background: '#F0FDF4' }}
+            >
+              <div className="erp-metric-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 26,
+                      height: 26,
+                      borderRadius: 6,
+                      background: '#DCFCE7',
+                      color: '#059669',
+                      border: '1px solid #86EFAC',
+                    }}
+                  >
+                    <CheckCircle2 size={14} strokeWidth={2.4} />
+                  </span>
+                  <span className="erp-metric-label-clean" style={{ color: '#065F46' }}>
+                    Approved Quotations
+                  </span>
+                </div>
+                <span className="erp-metric-pill erp-metric-pill-green">PDF Ready</span>
+              </div>
+              <div className="erp-metric-value-clean" style={{ color: '#047857' }}>
+                {quotations.filter((q) => q.status === 'approved').length} Approved
+              </div>
+              <div className="erp-metric-subline">
+                <span style={{ color: '#059669', fontWeight: 600 }}>
+                  Ready for PDF Download & 1-Click SO Conversion
+                </span>
+              </div>
+            </div>
+
+            <div className="erp-metric-card-clean">
+              <div className="erp-metric-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 26,
+                      height: 26,
+                      borderRadius: 6,
+                      background: '#FEF2F2',
+                      color: '#D97706',
+                      border: '1px solid #FDE68A',
+                    }}
+                  >
+                    <Clock size={14} strokeWidth={2.4} />
+                  </span>
+                  <span className="erp-metric-label-clean">Awaiting Sign-Off</span>
+                </div>
+                <span className="erp-metric-pill erp-metric-pill-orange">HOD Action</span>
+              </div>
+              <div className="erp-metric-value-clean">
+                {quotations.filter((q) => q.status === 'awaiting approval').length} Pending
+              </div>
+              <div className="erp-metric-subline">
+                <span>Requires Commercial Review</span>
+              </div>
+            </div>
+
+            <div className="erp-metric-card-clean">
+              <div className="erp-metric-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 26,
+                      height: 26,
+                      borderRadius: 6,
+                      background: '#EFF6FF',
+                      color: '#2563EB',
+                      border: '1px solid #BFDBFE',
+                    }}
+                  >
+                    <TrendingUp size={14} strokeWidth={2.4} />
+                  </span>
+                  <span className="erp-metric-label-clean">Pipeline Value</span>
+                </div>
+                <span className="erp-metric-pill erp-metric-pill-green">+18.5%</span>
+              </div>
+              <div className="erp-metric-value-clean">
+                ₹{quotations
+                  .reduce(
+                    (sum, q) =>
+                      sum +
+                      (Number(q.totalValue) ||
+                        Number(q.qty || q.items?.[0]?.qty || 1) *
+                          Number(q.unitPrice || q.items?.[0]?.unitPrice || 0)),
+                    0
+                  )
+                  .toLocaleString()}
+              </div>
+              <div className="erp-metric-subline">
+                <span>Total Active Quotes Value</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quotations Main Card */}
+          <Card
+            title="Commercial Chemical Quotations & Contract Bids"
+            subtitle="Download authorized PDF copies of HOD-approved quotes, or convert them directly to Production Sales Orders."
+            actions={
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[
+                    { key: 'all', label: `All (${quotations.length})` },
+                    { key: 'approved', label: `Approved (${quotations.filter((q) => q.status === 'approved').length})` },
+                    { key: 'awaiting approval', label: `Awaiting (${quotations.filter((q) => q.status === 'awaiting approval').length})` },
+                    { key: 'converted', label: `Converted (${quotations.filter((q) => q.status === 'converted').length})` },
+                  ].map((filterTab) => (
+                    <button
+                      key={filterTab.key}
+                      type="button"
+                      className={`erp-dash-pill ${quoteFilter === filterTab.key ? 'active' : ''}`}
+                      onClick={() => setQuoteFilter(filterTab.key)}
+                      style={{ fontSize: '0.6875rem', padding: '3px 8px' }}
+                    >
+                      {filterTab.label}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon={<Plus size={13} />}
+                  onClick={() => setIsQuoteModalOpen(true)}
+                >
+                  + New Quotation
+                </Button>
+              </div>
+            }
+            noPadding
+          >
+            <DataTable
+              columns={quotationDashboardColumns}
+              data={filteredQuotationsList}
+              keyField="id"
+            />
+          </Card>
+        </div>
+      ) : (
+        <>
+          {/* 4 Clean Metric Cards with Colorful Icons */}
       <div className="erp-grid-kpi">
         {/* Metric 1: Total Sales */}
         <div
@@ -664,6 +1044,9 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {/* Chemical Product Share & Order Phase Analytics (Pie / Donut Charts) */}
+      <DashboardCharts salesOrders={salesOrders} quotations={quotations} />
+
       {/* Main Grid: Orders & Approval Queue matching screenshot */}
       <div className="erp-grid-2col">
         {/* Left: Recent Sales & Dispatch Execution Table */}
@@ -849,6 +1232,8 @@ export function DashboardPage() {
           </div>
         </Card>
       </div>
+        </>
+      )}
 
       {/* Universal Approval Modal */}
       <ApprovalModal
@@ -977,6 +1362,84 @@ export function DashboardPage() {
           </div>
         </Modal>
       )}
+
+      {/* Official Chemical Outward Road Tanker Gate Pass with Celebratory Animation */}
+      <GatePassModal
+        isOpen={isGatePassModalOpen}
+        onClose={() => {
+          setIsGatePassModalOpen(false);
+          setSelectedGatePassConsignment(null);
+        }}
+        consignment={selectedGatePassConsignment}
+        availableConsignments={
+          logisticsTasks && logisticsTasks.length > 0
+            ? logisticsTasks.map((t) => ({
+                id: `GP-2026-${t.id?.replace(/[^0-9]/g, '') || '8921'}`,
+                soNumber: t.soNumber,
+                deliveryId: t.deliveryId,
+                client: t.consignee,
+                consignee: `${t.consignee}, ${t.pod || 'Customer Destination'}`,
+                product: t.productName,
+                spec: t.spec || 'USP / BP Chemical Standards Guaranteed',
+                volume: `${t.weightMT} MT`,
+                weightMT: t.weightMT,
+                vehicleNo: t.vehicleNo !== 'TBD' ? t.vehicleNo : 'GJ-16-AX-8921',
+                driverName: 'Rameshwar B. Patel',
+                driverContact: t.driverContact !== 'TBD' ? t.driverContact : '+91 98251 44921',
+                driverLicense: 'GJ16-2018-009124',
+                transporter: t.outwardTask?.line || 'SafeChem Bulk Carriers Ltd',
+                grossWeightKg: (t.weightMT * 1000) + 14280,
+                tareWeightKg: 14280,
+                netWeightKg: t.weightMT * 1000,
+                sealTop: 'SC-9912A',
+                sealBottom: 'SC-9912B',
+                inTime: '07:15 AM',
+                outTime: '10:30 AM',
+                gateNo: 'Security Gate #2 (Tanker Outward Terminal)',
+                ewayBill: '2410 8829 4410',
+                invoiceNo: `INV-2026-${t.soNumber?.replace(/[^0-9]/g, '').slice(-4) || '1082'}`,
+              }))
+            : [
+                {
+                  id: 'GP-2026-OCT-8921',
+                  soNumber: 'SO-2026-8939',
+                  deliveryId: 'D1',
+                  client: 'Pidilite Industries Ltd',
+                  consignee: 'Pidilite Industries Ltd, Plant Unit #2, Vapi, Gujarat',
+                  product: 'Distilled Oleic Acid',
+                  spec: 'Special Grade 90+ (Cosmetic / Pharma Spec)',
+                  volume: '24 MT',
+                  weightMT: 24,
+                  vehicleNo: 'GJ-16-AX-8921',
+                  driverName: 'Rameshwar B. Patel',
+                  driverContact: '+91 98251 44921',
+                  driverLicense: 'GJ16-2018-009124',
+                  transporter: 'SafeChem Bulk Carriers Ltd',
+                  grossWeightKg: 38280,
+                  tareWeightKg: 14280,
+                  netWeightKg: 24000,
+                  sealTop: 'SC-9912A',
+                  sealBottom: 'SC-9912B',
+                  inTime: '07:15 AM',
+                  outTime: '10:30 AM',
+                  gateNo: 'Security Gate #2 (Tanker Outward Terminal)',
+                  ewayBill: '2410 8829 4410',
+                  invoiceNo: 'INV-2026-1082',
+                },
+              ]
+        }
+        onSelectConsignment={(c) => setSelectedGatePassConsignment(c)}
+      />
+
+      {/* Official Chemical Quotation PDF Document Preview & Download Modal */}
+      <DocumentPdfModal
+        isOpen={Boolean(selectedQuoteForPdf)}
+        onClose={() => setSelectedQuoteForPdf(null)}
+        type="quote"
+        data={selectedQuoteForPdf}
+        currentUser={currentUser}
+        onConvertToSo={(qid) => convertQuotationToSalesOrder(qid)}
+      />
     </div>
   );
 }

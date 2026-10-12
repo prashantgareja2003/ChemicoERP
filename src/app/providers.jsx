@@ -87,6 +87,28 @@ export function ErpProvider({ children }) {
   const [outwardEntries, setOutwardEntries] = useState(INITIAL_OUTWARD_ENTRIES);
   const [localMiscEntries, setLocalMiscEntries] = useState(INITIAL_LOCAL_MISC);
   const [storeMissEntries, setStoreMissEntries] = useState(INITIAL_STORE_MISS);
+  const [dailyProductionEntries, setDailyProductionEntries] = useState([
+    {
+      id: 'PRD-26-801',
+      date: '10 Oct 2026 08:30 AM',
+      productId: 'PROD-001',
+      productName: 'Refined Glycerin 99.7% IP/USP',
+      quantityKg: 40000,
+      reactor: 'Reactor R-101 (Fractionation)',
+      batchNo: 'B-2610-881',
+      operator: 'Ramesh Patel (Senior Chemist)',
+    },
+    {
+      id: 'PRD-26-802',
+      date: '09 Oct 2026 02:15 PM',
+      productId: 'PROD-002',
+      productName: 'Triple Pressed Stearic Acid',
+      quantityKg: 60000,
+      reactor: 'Reactor R-102 (Esterification)',
+      batchNo: 'B-2610-879',
+      operator: 'Mahesh Solanki (Shift Supervisor)',
+    },
+  ]);
 
   // Operational State
   const [quotations, setQuotations] = useState(INITIAL_QUOTATIONS);
@@ -277,6 +299,17 @@ export function ErpProvider({ children }) {
 
   const addProductionOutput = useCallback((prodData) => {
     const qtyKg = Number(prodData.quantityKg || 0);
+    const newPrd = {
+      id: `PRD-26-${Date.now().toString().slice(-3)}`,
+      date: new Date().toLocaleString(),
+      productId: prodData.productId,
+      productName: prodData.productName,
+      quantityKg: qtyKg,
+      reactor: prodData.reactor || 'Reactor R-101 (Fractionation)',
+      batchNo: prodData.batchNo || `B-2610-${Date.now().toString().slice(-3)}`,
+      operator: currentUser.name,
+    };
+    setDailyProductionEntries((prev) => [newPrd, ...prev]);
     // Add stock
     setStock((prev) =>
       prev.map((s) =>
@@ -284,6 +317,33 @@ export function ErpProvider({ children }) {
       )
     );
     notify(`Production run logged: +${qtyKg} kg ${prodData.productName}. Added to finished stock.`);
+  }, [currentUser.name, notify]);
+
+  const deductDailyStockUsage = useCallback((usageData) => {
+    const qtyKg = Number(usageData.quantityKg || 0);
+    setStock((prev) =>
+      prev.map((s) =>
+        s.productId === usageData.productId
+          ? { ...s, stockKg: Math.max(0, s.stockKg - qtyKg) }
+          : s
+      )
+    );
+    const usageEntry = {
+      id: `USE-${Date.now().toString().slice(-3)}`,
+      date: new Date().toLocaleString(),
+      product: usageData.productName,
+      productId: usageData.productId,
+      quantityKg: qtyKg,
+      soNo: usageData.reason || 'Daily Plant Usage',
+      packagingType: 'Internal Plant Transfer',
+      invoiceNo: 'INTERNAL-CONSUMPTION',
+      vehicleNo: usageData.reactor || 'Reactor Charge',
+      ewayBill: 'N/A (Plant Internal)',
+      pol: 'Dahej Feedstock Silo',
+      pod: usageData.reactor || 'Reactor R-101 (Fractionation)',
+    };
+    setOutwardEntries((prev) => [usageEntry, ...prev]);
+    notify(`Deducted ${qtyKg} kg ${usageData.productName} for daily plant usage.`);
   }, [notify]);
 
   const addBatchForSalesOrder = useCallback((soId, batchData) => {
@@ -1301,11 +1361,13 @@ export function ErpProvider({ children }) {
         stock,
         inwardEntries,
         outwardEntries,
+        dailyProductionEntries,
         localMiscEntries,
         storeMissEntries,
         addInwardEntry,
         addOutwardEntry,
         addProductionOutput,
+        deductDailyStockUsage,
         addLocalMiscEntry,
         addStoreMissEntry,
 

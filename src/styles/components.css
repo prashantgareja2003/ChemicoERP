@@ -1551,41 +1551,22 @@
   width: 100%;
 }
 
-/* 8-Dashboard Pill Switcher */
+/* Dashboard Pill Switcher - Responsive & Clean (No horizontal scrollbar) */
 .erp-dash-pill-group {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  padding-bottom: 4px;
-  padding-top: 0;
-  margin-bottom: 12px;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  flex-wrap: wrap;
+  overflow: visible;
+  padding: 2px 0 6px 0;
+  margin-bottom: 14px;
 }
 
 .erp-dash-pill-group::-webkit-scrollbar {
-  height: 4px;
-}
-
-.erp-dash-pill-group::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.erp-dash-pill-group::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 4px;
-}
-
-.erp-dash-pill-group::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  display: none;
 }
 
 .erp-dash-pill {
@@ -2484,5 +2465,40 @@
     padding: 24px 16px;
   }
 }
+
+/* Print optimization for Gate Pass & Commercial Documents */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-gate-pass,
+  #printable-gate-pass *,
+  #printable-quotation-doc,
+  #printable-quotation-doc * {
+    visibility: visible;
+  }
+  #printable-gate-pass,
+  #printable-quotation-doc {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    box-shadow: none !important;
+    border: 1.5px solid #000 !important;
+  }
+  .modal-backdrop,
+  .modal-header,
+  .modal-footer,
+  .modal-close,
+  button,
+  .sidebar,
+  .topbar,
+  header {
+    display: none !important;
+  }
+}
+
 
 
