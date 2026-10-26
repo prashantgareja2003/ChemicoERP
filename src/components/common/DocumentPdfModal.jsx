@@ -25,7 +25,132 @@ export function DocumentPdfModal({
   const isApproved = data.status === 'approved';
 
   const handlePrint = () => {
-    window.print();
+    const printElement = document.getElementById('printable-quotation-doc');
+    if (!printElement) {
+      document.body.classList.add('cz-printing-active');
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('cz-printing-active');
+      }, 500);
+      return;
+    }
+
+    try {
+      const existingIframe = document.getElementById('cz-pdf-print-frame');
+      if (existingIframe) existingIframe.remove();
+
+      const iframe = document.createElement('iframe');
+      iframe.id = 'cz-pdf-print-frame';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.style.visibility = 'hidden';
+      document.body.appendChild(iframe);
+
+      const frameDoc = iframe.contentWindow || iframe.contentDocument;
+      const doc = frameDoc.document || frameDoc;
+
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${isQuote ? 'Chemical Sales Quotation' : 'Chemical Sales Order'} - ${data.id}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #FFFFFF;
+      color: #0F172A;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11.5px;
+      line-height: 1.4;
+    }
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .cz-pdf-doc {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 16px 20px;
+      box-sizing: border-box;
+    }
+    .cz-pdf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #047857;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .cz-pdf-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+    th, td {
+      padding: 6px 8px;
+      border: 1px solid #E2E8F0;
+      font-size: 11px;
+    }
+    th {
+      background: #F1F5F9;
+      font-weight: 700;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+  ${printElement.outerHTML}
+</body>
+</html>`);
+      doc.close();
+
+      setTimeout(() => {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (err) {
+          document.body.classList.add('cz-printing-active');
+          window.print();
+          setTimeout(() => {
+            document.body.classList.remove('cz-printing-active');
+          }, 500);
+        }
+        setTimeout(() => {
+          if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 2500);
+      }, 150);
+    } catch (e) {
+      document.body.classList.add('cz-printing-active');
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('cz-printing-active');
+      }, 500);
+    }
   };
 
   return (
@@ -66,29 +191,9 @@ export function DocumentPdfModal({
         </div>
       }
     >
-      <div
-        id="printable-quotation-doc"
-        style={{
-          padding: '24px 28px',
-          border: '1px solid #CBD5E1',
-          borderRadius: '8px',
-          background: '#FFFFFF',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-        }}
-      >
+      <div id="printable-quotation-doc" className="cz-pdf-doc">
         {/* Document Header */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            borderBottom: '2px solid #065F46',
-            paddingBottom: 12,
-          }}
-        >
+        <div className="cz-pdf-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <img
               src="/logo.png"
@@ -132,10 +237,8 @@ export function DocumentPdfModal({
 
         {/* Contracting Parties & Shipping Info */}
         <div
+          className="cz-pdf-grid-2col"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 16,
             fontSize: '0.71875rem',
             padding: '12px 14px',
             background: '#F8FAFC',

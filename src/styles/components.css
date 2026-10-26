@@ -1632,6 +1632,7 @@
 
 .cz-portal-viewport {
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background-color: var(--color-bg-workspace);
   background-image: 
@@ -2597,107 +2598,1081 @@
 }
 
 /* --------------------------------------------------------------------------
-   Responsive Media Queries for Portal
+   Responsive Media Queries for Portal & Enterprise Login Experience
    -------------------------------------------------------------------------- */
+
+/* Large Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .cz-mobile-mode-switcher {
+    display: none !important;
+  }
+  .cz-auth-card {
+    display: flex !important;
+  }
+  .cz-hero-panel {
+    display: flex !important;
+  }
+}
+
+/* Medium Desktop / Laptops (1024px - 1200px) */
 @media (max-width: 1200px) {
+  .cz-portal-header {
+    padding: 16px 32px;
+  }
+  .cz-portal-main {
+    padding: 10px 32px 36px 32px;
+  }
   .cz-portal-content-wrapper {
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 410px 1fr;
     gap: 24px;
+    max-width: 1200px;
   }
   .cz-auth-card {
     padding: 36px 30px;
   }
   .cz-hero-panel {
     padding: 36px 30px;
-  }
-  .cz-portal-header {
-    padding: 16px 28px;
-  }
-  .cz-portal-main {
-    padding: 10px 28px 36px 28px;
+    min-height: 600px;
   }
 }
 
-@media (max-width: 1024px) {
-  .cz-portal-content-wrapper {
-    grid-template-columns: 1fr;
-    max-width: 640px;
-  }
-  .cz-hero-panel {
-    min-height: 520px;
-  }
-  .cz-header-right-meta {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .cz-portal-header {
-    padding: 12px 16px;
-  }
-  .cz-portal-main {
-    padding: 6px 14px 28px 14px;
-  }
+/* Header adaptation for medium viewports (< 960px) */
+@media (max-width: 959.98px) {
   .cz-brand-vertical-divider,
   .cz-suite-indicator,
   .cz-brand-sanskrit {
-    display: none;
-  }
-  .cz-auth-card {
-    padding: 26px 18px;
-    border-radius: 18px;
-  }
-  .cz-hero-panel {
-    padding: 28px 18px;
-    border-radius: 18px;
-  }
-  .cz-feature-circles-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  .cz-trust-pillars-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .cz-industrial-headline {
-    font-size: 1.45rem;
-  }
-  .cz-auth-heading {
-    font-size: 1.55rem;
+    display: none !important;
   }
 }
 
-/* Print optimization for Gate Pass & Commercial Documents */
-@media print {
-  body * {
-    visibility: hidden;
+/* Tablet & Mobile Screens (< 1024px) - Centered & Adaptive Layout */
+@media (max-width: 1023.98px) {
+  .cz-portal-viewport {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
-  #printable-gate-pass,
-  #printable-gate-pass *,
-  #printable-quotation-doc,
-  #printable-quotation-doc * {
-    visibility: visible;
+
+  .cz-portal-header {
+    padding: 14px 20px;
   }
-  #printable-gate-pass,
-  #printable-quotation-doc {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 16px !important;
-    box-shadow: none !important;
-    border: 1.5px solid #000 !important;
+
+  .cz-header-container {
+    width: 100%;
   }
-  .modal-backdrop,
-  .modal-header,
-  .modal-footer,
-  .modal-close,
-  button,
-  .sidebar,
-  .topbar,
-  header {
+
+  .cz-security-indicator {
     display: none !important;
+  }
+
+  .cz-header-right-meta {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cz-portal-main {
+    padding: 12px 20px 36px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100dvh - 76px);
+  }
+
+  /* Segmented Mode Switcher (Sign In vs Plant Specs) */
+  .cz-mobile-mode-switcher {
+    display: flex !important;
+    align-items: center;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    padding: 4px;
+    margin: 0 auto 16px auto;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+  }
+
+  .cz-mode-switch-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: var(--radius-pill);
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .cz-mode-switch-btn.active {
+    background: var(--color-primary);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  }
+
+  .cz-portal-content-wrapper {
+    grid-template-columns: 1fr !important;
+    max-width: 480px !important;
+    width: 100% !important;
+    margin: 0 auto;
+    gap: 0 !important;
+  }
+
+  /* Toggle between Auth Card and Hero Panel on mobile */
+  .cz-auth-card {
+    display: none;
+    width: 100%;
+  }
+
+  .cz-auth-card.cz-mobile-visible {
+    display: flex !important;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  .cz-hero-panel {
+    display: none;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .cz-hero-panel.cz-mobile-visible {
+    display: flex !important;
+    animation: fadeIn 0.25s ease-out;
+  }
+}
+
+/* Mobile Phones (< 640px) */
+@media (max-width: 639.98px) {
+  .cz-portal-header {
+    padding: 10px 14px;
+  }
+
+  .cz-brand-emblem-frame {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    padding: 2px;
+  }
+
+  .cz-brand-title-bold {
+    font-size: 0.84375rem;
+    letter-spacing: 0.02em;
+  }
+
+  .cz-brand-subscript {
+    font-size: 0.625rem;
+  }
+
+  .cz-theme-toggle-pill {
+    padding: 5px 9px;
+    font-size: 0.6875rem;
+    gap: 5px;
+  }
+
+  .cz-portal-main {
+    padding: 8px 12px 24px 12px;
+    min-height: calc(100dvh - 64px);
+  }
+
+  .cz-mobile-mode-switcher {
+    max-width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .cz-mode-switch-btn {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+  }
+
+  .cz-portal-content-wrapper {
+    max-width: 100% !important;
+  }
+
+  .cz-auth-card {
+    padding: 22px 16px;
+    border-radius: 18px;
+  }
+
+  .cz-auth-card-top {
+    margin-bottom: 20px;
+  }
+
+  .cz-auth-heading {
+    font-size: 1.45rem;
+    margin-bottom: 4px;
+  }
+
+  .cz-auth-tagline {
+    font-size: 0.8125rem;
+  }
+
+  .cz-login-form {
+    gap: 15px;
+  }
+
+  .cz-text-field {
+    height: 46px;
+    font-size: 0.875rem;
+    padding: 0 12px 0 38px;
+    border-radius: 10px;
+  }
+
+  .cz-text-field.cz-field-pr {
+    padding-right: 38px;
+  }
+
+  .cz-input-leading-icon {
+    left: 12px;
+  }
+
+  .cz-otp-digits-grid {
+    gap: 5px;
+  }
+
+  .cz-otp-box {
+    height: 44px;
+    font-size: 1.15rem;
+    border-radius: 8px;
+  }
+
+  .cz-action-btn-primary {
+    height: 46px;
+    font-size: 0.875rem;
+    border-radius: 10px;
+  }
+
+  .cz-action-btn-secondary {
+    height: 42px;
+    font-size: 0.8125rem;
+    border-radius: 10px;
+  }
+
+  .cz-test-roles-bar {
+    padding-top: 8px;
+    gap: 5px;
+  }
+
+  .cz-test-roles-chips {
+    gap: 4px;
+  }
+
+  .cz-test-role-btn {
+    padding: 3px 7px;
+    font-size: 0.65625rem;
+    border-radius: 5px;
+  }
+
+  .cz-card-bottom-footnote {
+    margin-top: 18px;
+    font-size: 0.6875rem;
+  }
+
+  /* Mobile Hero styling when capabilities tab is active */
+  .cz-hero-panel {
+    padding: 22px 16px;
+    border-radius: 18px;
+    min-height: auto;
+  }
+
+  .cz-hero-foreground {
+    gap: 18px;
+  }
+
+  .cz-industrial-tag-pill {
+    font-size: 0.59375rem;
+    padding: 3px 9px;
+    margin-bottom: 8px;
+  }
+
+  .cz-industrial-headline {
+    font-size: 1.25rem;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .cz-industrial-subtext {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .cz-feature-circles-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .cz-circle-button-frame {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cz-circle-card-label {
+    font-size: 0.625rem;
+    max-width: 65px;
+  }
+
+  .cz-feature-live-pill {
+    padding: 8px 12px;
+  }
+
+  .cz-clearance-glass-card {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .cz-clearance-avatar-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cz-clearance-role-heading {
+    font-size: 0.75rem;
+  }
+
+  .cz-trust-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .cz-trust-label {
+    font-size: 0.65625rem;
+  }
+}
+
+/* Ultra-compact screens (< 360px - e.g. narrow Androids or Fold covers) */
+@media (max-width: 359.98px) {
+  .cz-portal-header {
+    padding: 8px 8px;
+  }
+
+  .cz-portal-main {
+    padding: 6px 6px 18px 6px;
+  }
+
+  .cz-auth-card {
+    padding: 18px 12px;
+  }
+
+  .cz-auth-heading {
+    font-size: 1.25rem;
+  }
+
+  .cz-otp-digits-grid {
+    gap: 3px;
+  }
+
+  .cz-otp-box {
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .cz-feature-circles-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* ==========================================================================
+   Chemzora Gate Pass & Document Printable System (Fully Responsive)
+   ========================================================================== */
+
+/* Celebratory Banner */
+.cz-gatepass-banner {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #FEF3C7 100%);
+  border: 1px solid #10B981;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  animation: pulse 2s infinite;
+}
+
+.cz-gatepass-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cz-gatepass-banner-badge {
+  background: #059669;
+  color: #FFFFFF;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Vehicle Selector Bar */
+.cz-gatepass-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cz-gatepass-selector-bar select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  max-width: 100%;
+}
+
+/* Printable Gate Pass Document Container */
+.cz-gatepass-doc {
+  padding: 24px 28px;
+  border: 2px solid #0F172A;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #0F172A;
+  font-family: var(--font-sans);
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.cz-gatepass-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-25deg);
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: rgba(16, 185, 129, 0.05);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.15em;
+  user-select: none;
+  text-align: center;
+}
+
+/* Document Header */
+.cz-gatepass-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #0F172A;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  gap: 16px;
+}
+
+.cz-gatepass-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cz-gatepass-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.cz-gatepass-company-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #047857;
+  line-height: 1.2;
+}
+
+.cz-gatepass-company-address {
+  font-size: 0.6875rem;
+  color: #475569;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.cz-gatepass-meta-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.cz-gatepass-title-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: #0F172A;
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cz-gatepass-id-num {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+
+.cz-gatepass-date-row {
+  font-size: 0.6875rem;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+/* Barcode Verification Bar */
+.cz-gatepass-barcode-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F8FAFC;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #E2E8F0;
+  margin-bottom: 14px;
+  font-size: 0.7rem;
+  gap: 10px;
+}
+
+.cz-gatepass-barcode-verify {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #0F172A;
+  white-space: nowrap;
+}
+
+/* 2-Column Responsive Information Grids */
+.cz-gatepass-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cz-gatepass-info-box {
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: #FFFFFF;
+  font-size: 0.71875rem;
+  box-sizing: border-box;
+}
+
+.cz-gatepass-info-box.weighbridge-box {
+  border-color: #10B981;
+  background: #F0FDF4;
+}
+
+.cz-gatepass-box-title {
+  font-weight: 700;
+  color: #0F172A;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+}
+
+.cz-gatepass-info-box.weighbridge-box .cz-gatepass-box-title {
+  color: #065F46;
+  border-color: #A7F3D0;
+}
+
+.cz-gatepass-subgrid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 4px 8px;
+  line-height: 1.35;
+}
+
+.cz-gatepass-subgrid-label {
+  color: #64748B;
+}
+
+.cz-gatepass-info-box.weighbridge-box .cz-gatepass-subgrid-label {
+  color: #047857;
+}
+
+/* Signatures & Stamps Grid */
+.cz-gatepass-signatures-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  border-top: 2px dashed #CBD5E1;
+  padding-top: 14px;
+  margin-top: 8px;
+  font-size: 0.65625rem;
+  text-align: center;
+}
+
+.cz-gatepass-sig-name {
+  font-weight: 700;
+  font-family: cursive;
+  font-size: 0.85rem;
+  min-height: 20px;
+}
+
+.cz-gatepass-sig-meta {
+  border-top: 1px solid #94A3B8;
+  padding-top: 2px;
+  margin-top: 4px;
+}
+
+.cz-gatepass-security-stamp {
+  border: 2px solid #059669;
+  border-radius: 4px;
+  padding: 4px;
+  background: #ECFDF5;
+  color: #065F46;
+  text-align: center;
+}
+
+/* Disclaimer Footnote */
+.cz-gatepass-disclaimer {
+  margin-top: 10px;
+  font-size: 0.59375rem;
+  color: #64748B;
+  text-align: center;
+  border-top: 1px solid #E2E8F0;
+  padding-top: 6px;
+  line-height: 1.3;
+}
+
+/* Document PDF Modal Responsive Classes */
+.cz-pdf-doc {
+  padding: 24px 28px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #0F172A;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.cz-pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #065F46;
+  padding-bottom: 12px;
+  gap: 14px;
+}
+
+.cz-pdf-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Tablet Adaptations for Gate Pass & Document Modals
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  .cz-gatepass-doc {
+    padding: 14px 10px;
+  }
+
+  .cz-gatepass-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 12px;
+  }
+
+  .cz-gatepass-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    padding-bottom: 10px;
+  }
+
+  .cz-gatepass-meta-right {
+    text-align: left;
+    border-top: 1px dashed #CBD5E1;
+    padding-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cz-gatepass-meta-right .cz-gatepass-id-num {
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .cz-gatepass-barcode-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .cz-gatepass-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cz-gatepass-subgrid {
+    grid-template-columns: 110px 1fr;
+    gap: 4px 6px;
+  }
+
+  .cz-gatepass-signatures-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .cz-gatepass-watermark {
+    font-size: 2.2rem;
+  }
+
+  .cz-pdf-doc {
+    padding: 14px 10px;
+    gap: 12px;
+  }
+
+  .cz-pdf-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .cz-pdf-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .cz-gatepass-doc {
+    padding: 10px 8px;
+    border-width: 1.5px;
+  }
+
+  .cz-gatepass-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cz-gatepass-company-name {
+    font-size: 1.05rem;
+  }
+
+  .cz-gatepass-company-address {
+    font-size: 0.625rem;
+  }
+
+  .cz-gatepass-subgrid {
+    grid-template-columns: 95px 1fr;
+    font-size: 0.65625rem;
+  }
+
+  .cz-gatepass-signatures-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cz-gatepass-watermark {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Print Optimization for Gate Pass & Commercial Documents (Strict 1-Page A4)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Keep shell and content wrappers transparent and visible so modal children are never hidden */
+  .erp-shell,
+  .erp-content {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Hide background dashboard UI, navigation, sidebars, topbar, drawers, headers, notifications, confetti */
+  .erp-sidebar,
+  .erp-topbar,
+  .erp-page-header,
+  .erp-stats-grid,
+  .erp-card,
+  .erp-table-container,
+  .erp-drawer-backdrop,
+  .erp-drawer,
+  .cz-gatepass-banner,
+  .cz-gatepass-selector-bar,
+  .erp-modal-header,
+  .erp-modal-footer,
+  .erp-modal-close,
+  .confetti-canvas,
+  canvas,
+  button,
+  .cz-portal-viewport,
+  .cz-mobile-mode-switcher {
+    display: none !important;
+  }
+
+  /* Reset Modal backdrop and wrappers so they take zero phantom height */
+  .erp-modal-backdrop {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    backdrop-filter: none !important;
+  }
+
+  .erp-modal {
+    position: static !important;
+    display: block !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .erp-modal-body {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* The Printable Gate Pass Document - Exact 1-page fit */
+  #printable-gate-pass,
+  .cz-gatepass-doc {
+    position: static !important;
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    padding: 14px 18px !important;
+    border: 2px solid #0F172A !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Always enforce official 2-column print layout, immune to mobile viewport overrides */
+  .cz-gatepass-doc .cz-gatepass-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    border-bottom: 2px solid #0F172A !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-brand {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-logo {
+    width: 46px !important;
+    height: 46px !important;
+    display: block !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-company-name {
+    font-size: 1.15rem !important;
+    color: #047857 !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-company-address {
+    font-size: 0.65625rem !important;
+    color: #475569 !important;
+    line-height: 1.3 !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-meta-right {
+    display: block !important;
+    text-align: right !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-id-num {
+    font-size: 1rem !important;
+    margin-top: 2px !important;
+    margin-left: 0 !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-barcode-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 5px 10px !important;
+    margin-bottom: 8px !important;
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+    font-size: 0.65625rem !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-info-box {
+    padding: 8px 10px !important;
+    font-size: 0.6875rem !important;
+    border: 1px solid #CBD5E1 !important;
+    background: #FFFFFF !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-info-box.weighbridge-box {
+    border-color: #10B981 !important;
+    background: #F0FDF4 !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-subgrid {
+    display: grid !important;
+    grid-template-columns: 110px 1fr !important;
+    gap: 3px 6px !important;
+    font-size: 0.6875rem !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-signatures-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    padding-top: 8px !important;
+    margin-top: 6px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-security-stamp {
+    padding: 3px !important;
+  }
+
+  .cz-gatepass-doc .cz-gatepass-disclaimer {
+    margin-top: 6px !important;
+    padding-top: 4px !important;
+    font-size: 0.53125rem !important;
+  }
+
+  .cz-gatepass-watermark {
+    font-size: 3.5rem !important;
+    opacity: 0.06 !important;
+    display: block !important;
+  }
+
+  /* Document PDF Quotation / Sales Order Printable rules */
+  #printable-quotation-doc,
+  .cz-pdf-doc {
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    padding: 16px 20px !important;
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .cz-pdf-doc .cz-pdf-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .cz-pdf-doc .cz-pdf-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
   }
 }
 

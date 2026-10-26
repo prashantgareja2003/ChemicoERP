@@ -162,6 +162,7 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(true);
   const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [mobileTab, setMobileTab] = useState('auth'); // 'auth' or 'capabilities' on mobile/tablet
 
   const resolvedUser = resolveUserFromInput(username);
   const activeRoleMeta = ROLE_PERMISSIONS[resolvedUser.role] || ROLE_PERMISSIONS.HOD;
@@ -271,12 +272,34 @@ export function LoginPage() {
 
       {/* Main Two-Column Centered Application Container */}
       <main className="cz-portal-main">
+        {/* Mobile / Tablet Segmented Mode Switcher (Visible only on screens < 1024px) */}
+        <div className="cz-mobile-mode-switcher">
+          <button
+            type="button"
+            className={`cz-mode-switch-btn ${mobileTab === 'auth' ? 'active' : ''}`}
+            onClick={() => setMobileTab('auth')}
+            aria-label="Enterprise Sign In Form"
+          >
+            <Lock size={14} />
+            <span>Enterprise Sign In</span>
+          </button>
+          <button
+            type="button"
+            className={`cz-mode-switch-btn ${mobileTab === 'capabilities' ? 'active' : ''}`}
+            onClick={() => setMobileTab('capabilities')}
+            aria-label="Dahej Plant Capabilities"
+          >
+            <Factory size={14} />
+            <span>Plant Tech & Specs</span>
+          </button>
+        </div>
+
         <div className="cz-portal-content-wrapper">
           
           {/* ========================================================= */}
           {/* LEFT COLUMN: Ultra-Clean Executive Login Workspace Card */}
           {/* ========================================================= */}
-          <div className="cz-auth-card">
+          <div className={`cz-auth-card ${mobileTab === 'auth' ? 'cz-mobile-visible' : ''}`}>
             
             {/* Card Header - Neat & Clean */}
             <div className="cz-auth-card-top">
@@ -451,7 +474,7 @@ export function LoginPage() {
           {/* ========================================================= */}
           {/* RIGHT COLUMN: Cinematic Industrial Hero & Capabilities   */}
           {/* ========================================================= */}
-          <div className="cz-hero-panel">
+          <div className={`cz-hero-panel ${mobileTab === 'capabilities' ? 'cz-mobile-visible' : ''}`}>
             {/* Background Chemical Plant Hero Image Layer */}
             <div
               className="cz-hero-backdrop-img"
