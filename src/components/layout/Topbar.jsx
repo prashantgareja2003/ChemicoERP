@@ -16,6 +16,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { useErp } from '../../hooks/useErp';
+import { PWAInstallButton } from '../common/PWAInstallModal';
 
 const DUMMY_NOTIFICATIONS = [
   {
@@ -356,6 +357,9 @@ export function Topbar({ onToggleSidebar, onOpenTracker, onOpenTasks }) {
             </div>
           )}
         </div>
+
+        {/* PWA Mobile App Install Quick Button */}
+        <PWAInstallButton variant="topbar" />
 
         {/* Global Dark / Light Theme Toggle Button */}
         <button

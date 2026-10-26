@@ -29,6 +29,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { useErp } from '../../hooks/useErp';
+import { PWAInstallButton } from '../../components/common/PWAInstallModal';
 import { ROLE_PERMISSIONS } from '../../services/rolePermissions';
 import { INITIAL_USERS } from '../../services/erpStore';
 import logoImg from '../../assets/logo.png';
@@ -251,6 +252,8 @@ export function LoginPage() {
           </div>
 
           <div className="cz-header-right-meta">
+            <PWAInstallButton variant="login" />
+
             <button
               type="button"
               onClick={toggleTheme}
