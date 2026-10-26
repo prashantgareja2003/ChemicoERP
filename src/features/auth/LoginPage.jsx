@@ -10,17 +10,64 @@ import {
   Mail,
   FlaskConical,
   Truck,
-  Droplets,
-  Layers,
+  Factory,
+  Radio,
   Award,
   Globe2,
+  Network,
+  UserCheck,
+  Shield,
+  KeyRound,
+  ChevronDown,
+  Sparkles,
+  Check,
+  Activity,
+  Cpu,
+  Layers,
+  Building2,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useErp } from '../../hooks/useErp';
 import { ROLE_PERMISSIONS } from '../../services/rolePermissions';
 import { INITIAL_USERS } from '../../services/erpStore';
 import logoImg from '../../assets/logo.png';
 import heroPlantImg from '../../assets/chemical-plant-hero.jpg';
-import smokePlantImg from '../../assets/industrial_plant_smoke.jpg';
+
+const FEATURE_METRICS = [
+  {
+    id: 'refining',
+    title: 'Refining Excellence',
+    icon: Factory,
+    spec: '99.8% High-Yield Distillation',
+    detail: 'Continuous 4-stage vacuum distillation with automated reflux control at Dahej Unit #2.',
+    badge: 'COLUMNS R-101/R-104 ACTIVE',
+  },
+  {
+    id: 'testing',
+    title: 'IP/USP 99.7% Tested',
+    icon: FlaskConical,
+    spec: 'Pharma & Food Grade Assured',
+    detail: 'Spectrophotometric & GC purity assay certified. Heavy metals <5ppm, Chlorides <10ppm.',
+    badge: 'QC MONOGRAPH PASSED',
+  },
+  {
+    id: 'iot',
+    title: 'Live Reactor IoT',
+    icon: Radio,
+    spec: '14 IoT Sensor Nodes Online',
+    detail: 'Sub-second temperature, pressure & vacuum level telemetry fed into DCS supervisory matrix.',
+    badge: 'DCS MATRIX ONLINE',
+  },
+  {
+    id: 'dispatch',
+    title: 'Tanker Dispatch',
+    icon: Truck,
+    spec: 'Smart Weighbridge Automated',
+    detail: 'Automated gross tare weighment, GPS tanker sealing & instant RFID outward gate clearance.',
+    badge: 'FLEET DISPATCH ACTIVE',
+  },
+];
 
 function resolveUserFromInput(input) {
   const query = (input || '').trim().toLowerCase();
@@ -96,7 +143,7 @@ function resolveUserFromInput(input) {
   return {
     id: `USR-${Date.now().toString().slice(-4)}`,
     name: cleanName || 'Enterprise User',
-    email: query.includes('@') ? query : `${query}@sdfoilchems.com`,
+    email: query.includes('@') ? query : `${query}@chemzora.com`,
     role: 'HOD',
     dept: 'Operations & Management',
   };
@@ -104,16 +151,26 @@ function resolveUserFromInput(input) {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useErp();
+  const { login, theme, toggleTheme } = useErp();
 
-  // Inputs accept ANY username and ANY password per client requirement
-  const [username, setUsername] = useState('rajesh.sharma@sdfoilchems.com');
-  const [password, setPassword] = useState('sdf@2026');
+  const [username, setUsername] = useState('rajesh.s@chemzora.com');
+  const [password, setPassword] = useState('chemzora@2026');
   const [showPassword, setShowPassword] = useState(false);
   const [authMode, setAuthMode] = useState('password'); // 'password' or 'otp'
-  const [otpCode, setOtpCode] = useState('449120');
+  const [otpDigits, setOtpDigits] = useState(['4', '4', '9', '1', '2', '0']);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [activeFeatureIndex, setActiveFeatureIndex] = useState(0);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+
+  const resolvedUser = resolveUserFromInput(username);
+  const activeRoleMeta = ROLE_PERMISSIONS[resolvedUser.role] || ROLE_PERMISSIONS.HOD;
+
+  const handleSelectRoleUser = (user) => {
+    setUsername(user.email);
+    setPassword('chemzora@2026');
+    setShowRoleDropdown(false);
+  };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -121,15 +178,15 @@ export function LoginPage() {
 
     setIsLoading(true);
 
-    const resolvedUser = resolveUserFromInput(username);
+    const user = resolveUserFromInput(username);
 
     setTimeout(() => {
       login({
-        id: resolvedUser.id,
-        name: resolvedUser.name,
-        email: resolvedUser.email,
-        role: resolvedUser.role,
-        dept: resolvedUser.dept,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        dept: user.dept,
         plant: 'Dahej Oleo Complex #1',
       });
       setIsLoading(false);
@@ -137,108 +194,144 @@ export function LoginPage() {
     }, 450);
   };
 
-  const resolvedUser = resolveUserFromInput(username);
-  const activeRoleMeta = ROLE_PERMISSIONS[resolvedUser.role] || ROLE_PERMISSIONS.HOD;
+  const handleOtpDigitChange = (index, val) => {
+    const clean = val.slice(-1);
+    const updated = [...otpDigits];
+    updated[index] = clean;
+    setOtpDigits(updated);
+    if (clean && index < 5) {
+      const nextInput = document.getElementById(`cz-otp-input-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      const prevInput = document.getElementById(`cz-otp-input-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const activeFeature = FEATURE_METRICS[activeFeatureIndex] || FEATURE_METRICS[0];
 
   return (
-    <div className="sdf-fluid-login-wrapper">
-      {/* Realistic Industrial Chemical Plant Smoke & Steam Animation Background */}
-      <div className="sdf-fluid-bg">
-        {/* Real Industrial Chemical Complex Backdrop */}
-        <div
-          className="sdf-smoke-plant-backdrop"
-          style={{ backgroundImage: `url(${smokePlantImg})` }}
-        />
-
-        {/* Dynamic Billowing Smoke & Steam Plumes (Matching User Reference Image) */}
-        <div className="sdf-steam-smoke-system">
-          {/* Main Chimney Steam Cloud Plumes */}
-          <div className="steam-cloud cloud-1" />
-          <div className="steam-cloud cloud-2" />
-          <div className="steam-cloud cloud-3" />
-          <div className="steam-cloud cloud-4" />
-          <div className="steam-cloud cloud-5" />
-          <div className="steam-cloud cloud-6" />
-
-          {/* Micro Steam Puffs drifting across distillation columns */}
-          <div className="steam-puff puff-1" />
-          <div className="steam-puff puff-2" />
-          <div className="steam-puff puff-3" />
-          <div className="steam-puff puff-4" />
-        </div>
-
-        {/* Soft Industrial Overlay without grid lines */}
-        <div className="sdf-smoke-clean-overlay" />
+    <div className="cz-portal-viewport">
+      {/* Background Ambient Glow & Decorative Grid */}
+      <div className="cz-portal-ambient-layer" aria-hidden="true">
+        <div className="cz-ambient-glow cz-glow-top-left" />
+        <div className="cz-ambient-glow cz-glow-bottom-right" />
+        <div className="cz-ambient-mesh-grid" />
       </div>
 
-      {/* Main Glassmorphic Enterprise Container matching user reference */}
-      <div className="sdf-login-card-container">
-        
-        {/* LEFT COLUMN: Clean, Modern, Elegant Login Form */}
-        <div className="sdf-login-form-column">
-          <div className="sdf-login-form-inner">
-            
-            {/* Top Brand Block */}
-            <div className="sdf-login-brand-header">
-              <div className="sdf-brand-badge-pill">
-                <img src={logoImg} alt="SDF Logo" className="sdf-brand-badge-logo" />
-                <div className="sdf-brand-badge-text">
-                  <span className="sdf-brand-badge-company">SDF OILCHEMS</span>
-                  <span className="sdf-brand-badge-tagline">Trusted Oleochemical Partner</span>
-                </div>
-              </div>
-
-              <div className="sdf-login-suite-title">
-                <span className="sdf-suite-prefix">SOL</span>
-                <span className="sdf-suite-name">Enterprise</span>
-              </div>
-              <p className="sdf-suite-caption">Industrial Oleochemicals & Refining ERP Gateway</p>
+      {/* Modern High-End Top Navigation Header */}
+      <header className="cz-portal-header">
+        <div className="cz-header-container">
+          <div className="cz-header-brand-block">
+            {/* Jewel Mandala Logo */}
+            <div className="cz-brand-emblem-frame">
+              <img src={logoImg} alt="Chemzora Logo" className="cz-brand-emblem-img" />
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleLoginSubmit} className="sdf-auth-form">
-              {/* Username / Email field */}
-              <div className="sdf-form-group">
-                <label className="sdf-input-label">Mobile / Registered Email</label>
-                <div className="sdf-input-box">
-                  <Mail size={16} className="sdf-input-icon" />
+            <div className="cz-brand-meta">
+              <div className="cz-brand-primary-name">
+                <span className="cz-brand-title-bold">CHEMZORA OILCHEMS</span>
+                <span className="cz-brand-subscript">Trusted Oleochemical Partner</span>
+              </div>
+              <div className="cz-brand-sanskrit">|| रसायनं परिवर्तनाय ||</div>
+            </div>
+
+            <div className="cz-brand-vertical-divider" aria-hidden="true" />
+
+            <div className="cz-suite-indicator">
+              <span className="cz-suite-accent">Chemzora</span>
+              <span className="cz-suite-core">Enterprise</span>
+              <span className="cz-suite-version-tag">v2.6 Core</span>
+            </div>
+          </div>
+
+          <div className="cz-header-right-meta">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="cz-theme-toggle-pill"
+              title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+              aria-label="Toggle Dark / Light Theme"
+            >
+              {theme === 'dark' ? <Sun size={15} color="#FBBF24" /> : <Moon size={15} color="#2563EB" />}
+              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            </button>
+
+            <div className="cz-security-indicator">
+              <ShieldCheck size={16} className="cz-sec-icon" />
+              <span>Secure Enterprise Access</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Two-Column Centered Application Container */}
+      <main className="cz-portal-main">
+        <div className="cz-portal-content-wrapper">
+          
+          {/* ========================================================= */}
+          {/* LEFT COLUMN: Ultra-Clean Executive Login Workspace Card */}
+          {/* ========================================================= */}
+          <div className="cz-auth-card">
+            
+            {/* Card Header - Neat & Clean */}
+            <div className="cz-auth-card-top">
+              <h1 className="cz-auth-heading">Welcome back</h1>
+              <p className="cz-auth-tagline">
+                Sign in to access your enterprise workspace.
+              </p>
+            </div>
+
+            {/* Authentication Form */}
+            <form onSubmit={handleLoginSubmit} className="cz-login-form">
+              {/* Username / Mobile / Email Field */}
+              <div className="cz-input-group">
+                <label className="cz-label-row">
+                  <span className="cz-label-text">Mobile / Registered Email</span>
+                </label>
+                <div className="cz-input-shell">
+                  <Mail size={17} className="cz-input-leading-icon" />
                   <input
                     type="text"
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your registered mobile or email"
-                    className="sdf-text-input"
+                    placeholder="rajesh.s@chemzora.com"
+                    className="cz-text-field"
                   />
                 </div>
               </div>
 
-              {/* Password or OTP field based on active mode */}
+              {/* Password or OTP Mode */}
               {authMode === 'password' ? (
-                <div className="sdf-form-group">
-                  <div className="sdf-label-row">
-                    <label className="sdf-input-label">Password</label>
+                <div className="cz-input-group">
+                  <div className="cz-label-row">
+                    <span className="cz-label-text">Enterprise Password</span>
                     <button
                       type="button"
-                      onClick={() => alert('Static Open Access: Any password is accepted!')}
-                      className="sdf-forgot-link"
+                      onClick={() => alert('Static Access: Any password is accepted for testing!')}
+                      className="cz-link-forgot"
                     >
-                      Forgot Password?
+                      Forgot password?
                     </button>
                   </div>
-                  <div className="sdf-input-box">
-                    <Lock size={16} className="sdf-input-icon" />
+                  <div className="cz-input-shell">
+                    <Lock size={17} className="cz-input-leading-icon" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password (any password accepted)"
-                      className="sdf-text-input"
+                      placeholder="••••••••••••"
+                      className="cz-text-field cz-field-pr"
                     />
                     <button
                       type="button"
-                      className="sdf-eye-btn"
+                      className="cz-eye-toggle-btn"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label="Toggle password visibility"
                     >
@@ -247,173 +340,233 @@ export function LoginPage() {
                   </div>
                 </div>
               ) : (
-                <div className="sdf-form-group">
-                  <div className="sdf-label-row">
-                    <label className="sdf-input-label">6-Digit SMS / OTP</label>
-                    <span className="sdf-otp-sent-hint">OTP sent to registered mobile</span>
+                <div className="cz-input-group">
+                  <div className="cz-label-row">
+                    <span className="cz-label-text">6-Digit Verification OTP</span>
+                    <span className="cz-otp-sms-badge">Code sent to mobile</span>
                   </div>
-                  <div className="sdf-input-box">
-                    <ShieldCheck size={16} className="sdf-input-icon" />
-                    <input
-                      type="text"
-                      maxLength={6}
-                      required
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="Enter 6-digit OTP code"
-                      className="sdf-text-input"
-                    />
+                  <div className="cz-otp-digits-grid">
+                    {otpDigits.map((d, i) => (
+                      <input
+                        key={i}
+                        id={`cz-otp-input-${i}`}
+                        type="text"
+                        maxLength={1}
+                        value={d}
+                        onChange={(e) => handleOtpDigitChange(i, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                        className="cz-otp-box"
+                      />
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Remember Session */}
-              <div className="sdf-session-row">
-                <label className="sdf-checkbox-label">
+              {/* Session Retention Row */}
+              <div className="cz-remember-bar">
+                <label className="cz-checkbox-container">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="sdf-checkbox"
+                    className="cz-custom-checkbox"
                   />
-                  <span>Remember my session</span>
+                  <span className="cz-checkbox-label-text">Remember my session for 30 days</span>
                 </label>
               </div>
 
-              {/* Primary Action Button matching reference */}
+              {/* Primary Action Button (Rich Chemzora Forest/Emerald Gradient) */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="sdf-submit-primary-btn"
+                className="cz-action-btn-primary"
               >
                 {isLoading ? (
-                  <span className="sdf-btn-loading">
-                    <span className="sdf-spinner" />
-                    <span>Verifying Access...</span>
+                  <span className="cz-btn-loader">
+                    <span className="cz-btn-spinner" />
+                    <span>Verifying Credentials...</span>
                   </span>
                 ) : (
                   <>
                     <span>Sign in with {authMode === 'password' ? 'password' : 'OTP'}</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={17} className="cz-btn-arrow-icon" />
                   </>
                 )}
               </button>
 
-              {/* Divider 'or' */}
-              <div className="sdf-divider-wrap">
-                <div className="sdf-divider-line" />
-                <span className="sdf-divider-text">or</span>
-                <div className="sdf-divider-line" />
+              {/* Divider 'OR' */}
+              <div className="cz-auth-divider">
+                <span className="cz-divider-bar" />
+                <span className="cz-divider-tag">OR</span>
+                <span className="cz-divider-bar" />
               </div>
 
-              {/* Secondary Alternate Mode Button matching reference */}
+              {/* Secondary Alternate Mode Button (White with Forest Green border) */}
               <button
                 type="button"
                 onClick={() => setAuthMode(authMode === 'password' ? 'otp' : 'password')}
-                className="sdf-alternate-auth-btn"
+                className="cz-action-btn-secondary"
               >
-                Sign in with {authMode === 'password' ? 'OTP' : 'password'}
+                {authMode === 'password' ? (
+                  <>
+                    <Shield size={16} className="cz-sec-btn-icon" />
+                    <span>Sign in with OTP</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock size={16} className="cz-sec-btn-icon" />
+                    <span>Sign in with password</span>
+                  </>
+                )}
               </button>
+
+              {/* Minimal Demo Profile Fast-Switch Tags */}
+              <div className="cz-test-roles-bar">
+                <span className="cz-test-roles-label">Test Profiles:</span>
+                <div className="cz-test-roles-chips">
+                  {INITIAL_USERS.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => {
+                        setUsername(u.email);
+                        setPassword('chemzora@2026');
+                      }}
+                      className={`cz-test-role-btn ${u.email === username ? 'active' : ''}`}
+                      title={`${u.name} — ${u.dept}`}
+                    >
+                      {u.role}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </form>
 
-            {/* Bottom Powered By Footer matching reference screenshot */}
-            <div className="sdf-login-bottom-credits">
-              <span>Powered by <strong>SDF Digital Systems • Enterprise Core</strong></span>
+            {/* Bottom Enterprise Footnote */}
+            <div className="cz-card-bottom-footnote">
+              <span>Powered by <strong>Chemzora Digital Systems</strong> • Enterprise Core</span>
             </div>
           </div>
-        </div>
 
-        {/* RIGHT COLUMN: Fluid Chemicals Industry Hero Visual & Capabilities Showcase */}
-        <div className="sdf-login-hero-column">
-          {/* Background Industrial Image with fluid gradient overlay */}
-          <div
-            className="sdf-hero-bg-image"
-            style={{ backgroundImage: `url(${heroPlantImg})` }}
-          />
-          <div className="sdf-hero-fluid-overlay" />
-          <div className="sdf-hero-glow-particles" />
+          {/* ========================================================= */}
+          {/* RIGHT COLUMN: Cinematic Industrial Hero & Capabilities   */}
+          {/* ========================================================= */}
+          <div className="cz-hero-panel">
+            {/* Background Chemical Plant Hero Image Layer */}
+            <div
+              className="cz-hero-backdrop-img"
+              style={{ backgroundImage: `url(${heroPlantImg})` }}
+            />
+            
+            {/* Deep Emerald Industrial Gradient Overlay */}
+            <div className="cz-hero-gradient-overlay" />
+            
+            {/* Ambient Lighting Rays */}
+            <div className="cz-hero-ambient-lighting" />
 
-          {/* Foreground Visual Content */}
-          <div className="sdf-hero-content">
-            {/* Top Slogan matching reference style */}
-            <div className="sdf-hero-header-block">
-              <h1 className="sdf-hero-headline">
-                END-TO-END OLEOCHEMICALS
-                <span className="sdf-hero-headline-accent">ONE TRUSTED PARTNER</span>
-              </h1>
-              <p className="sdf-hero-subtext">
-                Advanced Glycerin Refining. Pure Fatty Acids. Smart Tanker Logistics.
-                Real-Time Batch Traceability.
-              </p>
-            </div>
-
-            {/* 4 Feature Icons Row matching reference screenshot layout */}
-            <div className="sdf-hero-features-row">
-              <div className="sdf-hero-feature-item">
-                <div className="sdf-feature-icon-circle">
-                  <Droplets size={17} />
+            {/* Hero Foreground Content */}
+            <div className="cz-hero-foreground">
+              
+              {/* Top Industrial Headline Block */}
+              <div className="cz-hero-top-block">
+                <div className="cz-industrial-tag-pill">
+                  <Sparkles size={12} className="cz-tag-sparkle" />
+                  <span>BUILT FOR INDUSTRIAL EXCELLENCE</span>
                 </div>
-                <span className="sdf-feature-label">Refining Excellence</span>
+
+                <h2 className="cz-industrial-headline">
+                  END-TO-END OLEOCHEMICALS
+                  <span className="cz-headline-highlight">ONE TRUSTED PARTNER</span>
+                </h2>
+
+                <p className="cz-industrial-subtext">
+                  Advanced Glycerin Refining. Pure Fatty Acids. Smart Tanker Logistics. Real-Time Batch Traceability.
+                </p>
               </div>
 
-              <div className="sdf-hero-feature-item">
-                <div className="sdf-feature-icon-circle">
-                  <FlaskConical size={17} />
+              {/* 4 Interactive Feature Circles with Live Telemetry Specs */}
+              <div className="cz-features-interactive-deck">
+                <div className="cz-feature-circles-grid">
+                  {FEATURE_METRICS.map((item, idx) => {
+                    const IconComponent = item.icon;
+                    const isActive = activeFeatureIndex === idx;
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => setActiveFeatureIndex(idx)}
+                        onMouseEnter={() => setActiveFeatureIndex(idx)}
+                        className={`cz-feature-interactive-card ${isActive ? 'active' : ''}`}
+                      >
+                        <div className="cz-circle-button-frame">
+                          <IconComponent size={21} className="cz-circle-icon" />
+                          {isActive && <span className="cz-circle-active-ring" />}
+                        </div>
+                        <span className="cz-circle-card-label">{item.title}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <span className="sdf-feature-label">IP/USP 99.7% Tested</span>
-              </div>
 
-              <div className="sdf-hero-feature-item">
-                <div className="sdf-feature-icon-circle">
-                  <Layers size={17} />
+                {/* Live Telemetry Drawer Popover for Active Feature */}
+                <div className="cz-feature-live-pill">
+                  <div className="cz-live-pill-header">
+                    <span className="cz-live-pill-badge">{activeFeature.badge}</span>
+                    <span className="cz-live-pill-spec">{activeFeature.spec}</span>
+                  </div>
+                  <p className="cz-live-pill-detail">{activeFeature.detail}</p>
                 </div>
-                <span className="sdf-feature-label">Live Reactor IoT</span>
               </div>
 
-              <div className="sdf-hero-feature-item">
-                <div className="sdf-feature-icon-circle">
-                  <Truck size={17} />
+              {/* Dynamic Profile Clearance Card (Linked to the Active User in Form) */}
+              <div className="cz-clearance-glass-card">
+                <div className="cz-clearance-avatar-box">
+                  <UserCheck size={22} className="cz-clearance-user-icon" />
+                  <span className="cz-clearance-pulse-indicator" />
                 </div>
-                <span className="sdf-feature-label">Tanker Dispatch</span>
-              </div>
-            </div>
 
-            {/* Active Role Permissions Card */}
-            <div className="sdf-hero-role-preview-card">
-              <div className="sdf-preview-card-header">
-                <span className="sdf-preview-pulse-dot" />
-                <span className="sdf-preview-role-name">
-                  Profile Clearance: {resolvedUser.role} — {activeRoleMeta.label}
-                </span>
-                <span className="sdf-preview-access-pill">Full Clearance</span>
+                <div className="cz-clearance-info-col">
+                  <div className="cz-clearance-row-top">
+                    <span className="cz-clearance-role-heading">
+                      Profile Clearance: <strong>{resolvedUser.role}</strong> — {activeRoleMeta.label}
+                    </span>
+                    <span className="cz-clearance-badge-pill">
+                      FULL CLEARANCE
+                    </span>
+                  </div>
+                  <p className="cz-clearance-description">
+                    {activeRoleMeta.description}
+                  </p>
+                </div>
               </div>
-              <p className="sdf-preview-description">{activeRoleMeta.description}</p>
-            </div>
 
-            {/* Bottom 4 Pillars matching reference screenshot */}
-            <div className="sdf-hero-pillars-row">
-              <div className="sdf-pillar-item">
-                <Award size={14} className="sdf-pillar-icon" />
-                <span>Empowering Global Buyers</span>
-              </div>
-              <div className="sdf-pillar-item">
-                <CheckCircle2 size={14} className="sdf-pillar-icon" />
-                <span>Zero Contamination</span>
-              </div>
-              <div className="sdf-pillar-item">
-                <Globe2 size={14} className="sdf-pillar-icon" />
-                <span>Global Export Chain</span>
-              </div>
-              <div className="sdf-pillar-item">
-                <ShieldCheck size={14} className="sdf-pillar-icon" />
-                <span>Audit-Ready ISO 9001</span>
-              </div>
-            </div>
+              {/* Bottom 4 Certified Trust Pillars */}
+              <div className="cz-trust-pillars-grid">
+                <div className="cz-trust-pillar-item">
+                  <Globe2 size={17} className="cz-trust-icon" />
+                  <span className="cz-trust-label">Empowering Global Buyers</span>
+                </div>
 
+                <div className="cz-trust-pillar-item">
+                  <ShieldCheck size={17} className="cz-trust-icon" />
+                  <span className="cz-trust-label">Zero Contamination</span>
+                </div>
+
+                <div className="cz-trust-pillar-item">
+                  <Network size={17} className="cz-trust-icon" />
+                  <span className="cz-trust-label">Global Export Chain</span>
+                </div>
+
+                <div className="cz-trust-pillar-item">
+                  <Award size={17} className="cz-trust-icon" />
+                  <span className="cz-trust-label">Audit-Ready ISO 9001</span>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
 
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

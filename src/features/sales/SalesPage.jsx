@@ -126,7 +126,7 @@ export function SalesPage() {
     const defaultProd = products[0] || {};
     setQuoteForm({
       customerId: defaultCust.id || '',
-      fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+      fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
       containerType: '20ft FCL / Tanker',
       loadingCapacity: '40 MT',
       leadTime: '5-7 Business Days',
@@ -153,7 +153,7 @@ export function SalesPage() {
     setEditingQuoteId(row.id);
     setQuoteForm({
       customerId: row.customerId || customers.find((c) => c.companyName === row.customerName)?.id || customers[0]?.id || '',
-      fromPlace: row.fromPlace || 'SDF Oilchems Limited, Dahej Plant #1',
+      fromPlace: row.fromPlace || 'Chemzora Oilchem Limited, Dahej Plant #1',
       containerType: row.containerType || '20ft FCL / Tanker',
       loadingCapacity: row.loadingCapacity || '40 MT',
       leadTime: row.leadTime || '5-7 Business Days',
@@ -263,7 +263,7 @@ export function SalesPage() {
   // Quotation Form matching Section 3 with Table Grid for multiple items
   const [quoteForm, setQuoteForm] = useState({
     customerId: '',
-    fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+    fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
     containerType: '20ft FCL / Tanker',
     loadingCapacity: '40 MT',
     leadTime: '5-7 Business Days',
@@ -620,9 +620,9 @@ export function SalesPage() {
             {/* Document Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--color-primary-dark)', paddingBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img src="/logo.png" alt="SDF Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
+                <img src="/logo.png" alt="Chemzora Logo" style={{ width: 48, height: 48, objectFit: 'contain' }} />
                 <div>
-                  <h2 style={{ color: 'var(--color-primary-dark)', margin: 0, fontSize: '1.25rem' }}>SDF OILCHEMS LIMITED</h2>
+                  <h2 style={{ color: 'var(--color-primary-dark)', margin: 0, fontSize: '1.25rem' }}>CHEMZORA OILCHEM LIMITED</h2>
                   <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
                     Plot No. 1201, GIDC Industrial Estate, Dahej, Bharuch, Gujarat 392130<br />
                     GSTIN: 24AAACS8912P1ZA • CIN: U24230GJ2005PLC046123
@@ -658,7 +658,7 @@ export function SalesPage() {
                 <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Building2 size={13} /> CONSIGNOR / PLACE OF ORIGIN:
                 </div>
-                <div>{selectedRecordForView.data.fromPlace || 'SDF Oilchems Limited, Dahej Plant #1, Gujarat'}</div>
+                <div>{selectedRecordForView.data.fromPlace || 'Chemzora Oilchem Limited, Dahej Plant #1, Gujarat'}</div>
                 <div style={{ marginTop: 8, fontWeight: 700, color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Building2 size={13} /> TO CONSIGNEE / DESTINATION:
                 </div>
@@ -726,7 +726,7 @@ export function SalesPage() {
               </table>
             </div>
 
-            {/* Banking Details Box (SDF Oilchems Limited Defaults) */}
+            {/* Banking Details Box (Chemzora Oilchem Limited Defaults) */}
             <div
               style={{
                 display: 'grid',
@@ -743,7 +743,7 @@ export function SalesPage() {
                 <div style={{ fontWeight: 700, color: 'var(--color-primary-dark)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Landmark size={13} /> OFFICIAL BANK REMITTANCE INSTRUCTIONS:
                 </div>
-                <div><strong>Account Name:</strong> SDF Oilchems Limited</div>
+                <div><strong>Account Name:</strong> Chemzora Oilchem Limited</div>
                 <div><strong>Account Number:</strong> 002105001892</div>
                 <div><strong>IFSC Code:</strong> HDFC0000021</div>
                 <div><strong>Beneficiary Bank:</strong> HDFC Bank, Dahej SEZ Branch, Gujarat, India</div>
@@ -775,7 +775,7 @@ export function SalesPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '2px solid var(--color-border)', fontSize: 'var(--font-size-xs)' }}>
               <div>
                 <div><strong>Prepared By:</strong> {selectedRecordForView.data.preparedBy || currentUser.name}</div>
-                <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.6875rem' }}>Electronic Generation Reference: SDF-ERP-V2</div>
+                <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.6875rem' }}>Electronic Generation Reference: CHZ-ERP-V2</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 {selectedRecordForView.data.status === 'open' ? (

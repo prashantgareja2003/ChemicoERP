@@ -116,7 +116,7 @@ export function DispatchPage() {
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--font-size-xs)' }}>
             <div style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-              <div><strong>From CX / Place:</strong> {selectedTask.fromPlace || 'SDF Oilchems Dahej Plant #1'}</div>
+              <div><strong>From CX / Place:</strong> {selectedTask.fromPlace || 'Chemzora Oilchem Dahej Plant #1'}</div>
               <div><strong>To Consignee / Dest:</strong> {selectedTask.consignee}</div>
               <div><strong>Buyer other than Consignee:</strong> {selectedTask.buyerOtherThanConsignee || 'Same as Consignee'}</div>
               <div><strong>Sales Order Ref #:</strong> {selectedTask.soNumber} ({selectedTask.deliveryId})</div>

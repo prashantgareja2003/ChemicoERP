@@ -1,5 +1,5 @@
 /**
- * Role-Based Access Control (RBAC) Matrix for SDF Oilchems Limited ERP
+ * Role-Based Access Control (RBAC) Matrix for Chemzora Oilchem Limited ERP
  * Defines authorized routes, module accessibility, and descriptive permissions per role.
  */
 

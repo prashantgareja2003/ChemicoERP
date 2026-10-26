@@ -92,7 +92,7 @@ export function DocumentPdfModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <img
               src="/logo.png"
-              alt="SDF Logo"
+              alt="Chemzora Logo"
               style={{ width: 48, height: 48, objectFit: 'contain' }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -100,7 +100,7 @@ export function DocumentPdfModal({
             />
             <div>
               <h2 style={{ color: '#065F46', margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
-                SDF OILCHEMS LIMITED
+                CHEMZORA OILCHEM LIMITED
               </h2>
               <div style={{ fontSize: '0.6875rem', color: '#475569', marginTop: 2, lineHeight: 1.35 }}>
                 Plot No. 1201, GIDC Industrial Estate, Dahej, Bharuch, Gujarat 392130<br />
@@ -156,7 +156,7 @@ export function DocumentPdfModal({
             >
               <Building2 size={13} /> CONSIGNOR / ORIGIN:
             </div>
-            <div>{data.fromPlace || 'SDF Oilchems Limited, Dahej Plant #1, Gujarat'}</div>
+            <div>{data.fromPlace || 'Chemzora Oilchem Limited, Dahej Plant #1, Gujarat'}</div>
             <div
               style={{
                 marginTop: 8,
@@ -289,7 +289,7 @@ export function DocumentPdfModal({
             >
               <Landmark size={13} /> OFFICIAL BANK REMITTANCE INSTRUCTIONS:
             </div>
-            <div><strong>Account Name:</strong> SDF Oilchems Limited</div>
+            <div><strong>Account Name:</strong> Chemzora Oilchem Limited</div>
             <div><strong>Account Number:</strong> 002105001892</div>
             <div><strong>IFSC Code:</strong> HDFC0000021</div>
             <div><strong>Bank & Branch:</strong> HDFC Bank, Dahej SEZ Branch, Gujarat</div>
@@ -319,7 +319,7 @@ export function DocumentPdfModal({
           <div>
             <div><strong>Prepared By:</strong> {data.preparedBy || currentUser?.name || 'Sales Commercial Desk'}</div>
             <div style={{ color: '#64748B', fontSize: '0.6875rem' }}>
-              System Document Ref: SDF-QUOT-REV-4
+              System Document Ref: CHZ-QUOT-REV-4
             </div>
           </div>
 

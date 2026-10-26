@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ErpContext } from '../hooks/useErp';
 import {
   INITIAL_USERS,
@@ -24,7 +24,7 @@ export function ErpProvider({ children }) {
   // On run project, user starts unauthenticated so login page opens first
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      const stored = localStorage.getItem('sdf_auth');
+      const stored = localStorage.getItem('chemzora_auth') || localStorage.getItem('sdf_auth');
       return stored ? Boolean(JSON.parse(stored).isAuthenticated) : false;
     } catch {
       return false;
@@ -34,7 +34,7 @@ export function ErpProvider({ children }) {
   const [users, setUsers] = useState(INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const stored = localStorage.getItem('sdf_auth');
+      const stored = localStorage.getItem('chemzora_auth') || localStorage.getItem('sdf_auth');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.user) return parsed.user;
@@ -47,11 +47,42 @@ export function ErpProvider({ children }) {
 
   const [activePlant, setActivePlant] = useState('Dahej Oleo Plant #1');
 
+  // Global Theme Mode: 'dark' (Default) or 'light'
+  const [theme, setTheme] = useState(() => {
+    try {
+      const storedTheme = localStorage.getItem('chemzora_theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+      return 'dark'; // Premium Dark Mode by default
+    } catch {
+      return 'dark';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+      } else {
+        document.body.classList.add('light-theme');
+        document.body.classList.remove('dark-theme');
+      }
+      localStorage.setItem('chemzora_theme', theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
   const login = useCallback((userData) => {
     const userObj = {
       id: userData.id || `USR-${Date.now().toString().slice(-4)}`,
       name: userData.name || 'Enterprise User',
-      email: userData.email || `${(userData.name || 'user').toLowerCase().replace(/\s+/g, '.')}@sdfoilchems.com`,
+      email: userData.email || `${(userData.name || 'user').toLowerCase().replace(/\s+/g, '.')}@chemzora.com`,
       role: userData.role || 'Admin',
       dept: userData.dept || (userData.role === 'Admin' ? 'System Administration' : `${userData.role} Department`),
       active: true,
@@ -59,7 +90,7 @@ export function ErpProvider({ children }) {
     setCurrentUser(userObj);
     setIsAuthenticated(true);
     try {
-      localStorage.setItem('sdf_auth', JSON.stringify({ isAuthenticated: true, user: userObj }));
+      localStorage.setItem('chemzora_auth', JSON.stringify({ isAuthenticated: true, user: userObj }));
     } catch {
       // ignore
     }
@@ -69,6 +100,7 @@ export function ErpProvider({ children }) {
   const logout = useCallback(() => {
     setIsAuthenticated(false);
     try {
+      localStorage.removeItem('chemzora_auth');
       localStorage.removeItem('sdf_auth');
     } catch {
       // ignore
@@ -441,7 +473,7 @@ export function ErpProvider({ children }) {
     const newQuote = {
       id,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+      fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
       status: 'awaiting approval',
       convertedSoId: null,
       history: [
@@ -492,7 +524,7 @@ export function ErpProvider({ children }) {
       })),
       totalValue: totalVal,
       banking: {
-        accountName: 'SDF Oilchems Limited',
+        accountName: 'Chemzora Oilchem Limited',
         accountNumber: '028905001928',
         ifsc: 'HDFC0000289',
         bankName: 'HDFC Bank, Commercial Branch, Dahej',
@@ -594,7 +626,7 @@ export function ErpProvider({ children }) {
       deliveries: defaultDeliveries,
       receivedPayment: 0,
       banking: {
-        accountName: 'SDF Oilchems Limited',
+        accountName: 'Chemzora Oilchem Limited',
         accountNumber: '002105001892',
         ifsc: 'HDFC0000021',
         bankName: 'HDFC Bank, Dahej SEZ Branch',
@@ -661,7 +693,7 @@ export function ErpProvider({ children }) {
     const newPo = {
       id,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      buyerName: 'SDF Oilchems Limited, Dahej Plant #1',
+      buyerName: 'Chemzora Oilchem Limited, Dahej Plant #1',
       totalValue: val,
       totalWithTax: withTax,
       status: 'awaiting approval',
@@ -1338,6 +1370,8 @@ export function ErpProvider({ children }) {
         setCurrentUser,
         activePlant,
         setActivePlant,
+        theme,
+        toggleTheme,
 
         // Masters
         customers,

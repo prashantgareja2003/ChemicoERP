@@ -147,9 +147,9 @@ export function Sidebar({ isOpen, onClose }) {
         {/* Header / Brand matching screenshot */}
         <div className="erp-sidebar-header">
           <NavLink to="/" className="erp-sidebar-brand" onClick={onClose}>
-            <img src={logoImg} alt="SDF Logo" className="erp-brand-logo" />
+            <img src={logoImg} alt="Chemzora Logo" className="erp-brand-logo" />
             <div className="erp-brand-title">
-              <span className="erp-brand-name">SDF Oilchems</span>
+              <span className="erp-brand-name">Chemzora Oilchems</span>
               <span className="erp-brand-tagline">Enterprise ERP</span>
             </div>
           </NavLink>

@@ -1,5 +1,5 @@
 /**
- * SDF Oilchems ERP - Service Client
+ * Chemzora Oilchem ERP - Service Client
  * Clean abstraction layer for ERP data operations.
  */
 import {

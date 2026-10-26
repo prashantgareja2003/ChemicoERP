@@ -1,19 +1,19 @@
 /**
- * SDF Oilchems Limited - Enterprise ERP Master Data & Operational Store
+ * Chemzora Oilchem Limited - Enterprise ERP Master Data & Operational Store
  * Comprehensive in-memory static & operational state covering:
  * Auto-numbering: SOL/Q/, SOL/SO/, SOL/PO/, SOL/EXP/, SOL/MIS/
  * Roles: Admin, Prod, Logistics, Sales, Finance, HOD, QC/QA, Management
  */
 
 export const INITIAL_USERS = [
-  { id: 'USR-1', name: 'Rajesh Sharma', email: 'rajesh.s@sdfoilchems.com', role: 'HOD', dept: 'Operations & Management', active: true },
-  { id: 'USR-2', name: 'Vikram Nair', email: 'vikram.n@sdfoilchems.com', role: 'Sales', dept: 'Commercial Sales', active: true },
-  { id: 'USR-3', name: 'Suresh Jadhav', email: 'suresh.j@sdfoilchems.com', role: 'Prod', dept: 'Plant Manufacturing', active: true },
-  { id: 'USR-4', name: 'Dr. K. Swaminathan', email: 'swami.qc@sdfoilchems.com', role: 'QC/QA', dept: 'Quality Assurance', active: true },
-  { id: 'USR-5', name: 'Rahul Dave', email: 'rahul.d@sdfoilchems.com', role: 'Logistics', dept: 'Supply Chain & Logistics', active: true },
-  { id: 'USR-6', name: 'Meera Patel', email: 'meera.p@sdfoilchems.com', role: 'Finance', dept: 'Finance & Accounts', active: true },
-  { id: 'USR-7', name: 'Alok Verma', email: 'alok.admin@sdfoilchems.com', role: 'Admin', dept: 'System Administration', active: true },
-  { id: 'USR-8', name: 'V. K. Mehta', email: 'director@sdfoilchems.com', role: 'Management', dept: 'Board of Directors', active: true },
+  { id: 'USR-1', name: 'Rajesh Sharma', email: 'rajesh.s@chemzora.com', role: 'HOD', dept: 'Operations & Management', active: true },
+  { id: 'USR-2', name: 'Vikram Nair', email: 'vikram.n@chemzora.com', role: 'Sales', dept: 'Commercial Sales', active: true },
+  { id: 'USR-3', name: 'Suresh Jadhav', email: 'suresh.j@chemzora.com', role: 'Prod', dept: 'Plant Manufacturing', active: true },
+  { id: 'USR-4', name: 'Dr. K. Swaminathan', email: 'swami.qc@chemzora.com', role: 'QC/QA', dept: 'Quality Assurance', active: true },
+  { id: 'USR-5', name: 'Rahul Dave', email: 'rahul.d@chemzora.com', role: 'Logistics', dept: 'Supply Chain & Logistics', active: true },
+  { id: 'USR-6', name: 'Meera Patel', email: 'meera.p@chemzora.com', role: 'Finance', dept: 'Finance & Accounts', active: true },
+  { id: 'USR-7', name: 'Alok Verma', email: 'alok.admin@chemzora.com', role: 'Admin', dept: 'System Administration', active: true },
+  { id: 'USR-8', name: 'V. K. Mehta', email: 'director@chemzora.com', role: 'Management', dept: 'Board of Directors', active: true },
 ];
 
 export const INITIAL_CUSTOMERS = [
@@ -201,7 +201,7 @@ export const INITIAL_QUOTATIONS = [
   {
     id: 'SOL/Q/1041',
     date: '08 Oct 2026',
-    fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+    fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
     customerId: 'CUST-001',
     customerName: 'Godrej Consumer Products Ltd',
     items: [
@@ -234,7 +234,7 @@ export const INITIAL_QUOTATIONS = [
   {
     id: 'SOL/Q/1042',
     date: '09 Oct 2026',
-    fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+    fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
     customerId: 'CUST-002',
     customerName: 'Hindustan Unilever Ltd (HUL)',
     items: [
@@ -266,7 +266,7 @@ export const INITIAL_QUOTATIONS = [
   {
     id: 'SOL/Q/1043',
     date: '10 Oct 2026',
-    fromPlace: 'SDF Oilchems Limited, Dahej Plant #1',
+    fromPlace: 'Chemzora Oilchem Limited, Dahej Plant #1',
     customerId: 'CUST-003',
     customerName: 'Pidilite Industries Ltd',
     items: [
@@ -327,7 +327,7 @@ export const INITIAL_SALES_ORDERS = [
     ],
     totalValue: 3840000,
     banking: {
-      accountName: 'SDF Oilchems Limited',
+      accountName: 'Chemzora Oilchem Limited',
       accountNumber: '028905001928',
       ifsc: 'HDFC0000289',
       bankName: 'HDFC Bank, Commercial Branch, Dahej',
@@ -381,7 +381,7 @@ export const INITIAL_SALES_ORDERS = [
     ],
     totalValue: 6420000,
     banking: {
-      accountName: 'SDF Oilchems Limited',
+      accountName: 'Chemzora Oilchem Limited',
       accountNumber: '028905001928',
       ifsc: 'HDFC0000289',
       bankName: 'HDFC Bank, Dahej',
@@ -433,7 +433,7 @@ export const INITIAL_SALES_ORDERS = [
     ],
     totalValue: 8250000,
     banking: {
-      accountName: 'SDF Oilchems Limited',
+      accountName: 'Chemzora Oilchem Limited',
       accountNumber: '028905001928',
       ifsc: 'HDFC0000289',
       bankName: 'HDFC Bank',
@@ -464,10 +464,10 @@ export const INITIAL_PURCHASE_ORDERS = [
     date: '08 Oct 2026',
     supplierId: 'SUPP-001',
     supplierName: 'Gujarat Alkalies and Chemicals Ltd (GACL)',
-    buyerName: 'SDF Oilchems Limited',
+    buyerName: 'Chemzora Oilchem Limited',
     gstin: '24AAACG1280B1Z8',
     address: 'P.O. Ranoli, Vadodara, Gujarat 391350',
-    deliveryPoint: 'SDF Oilchems Ltd, Bulk Tank Farm C, Dahej SEZ, Gujarat',
+    deliveryPoint: 'Chemzora Oilchem Ltd, Bulk Tank Farm C, Dahej SEZ, Gujarat',
     material: 'Caustic Soda Lye 48%',
     hsn: '28151200',
     spec: 'Membrane Cell Grade 48.5% NaOH min, Chlorides <100ppm',
@@ -497,10 +497,10 @@ export const INITIAL_PURCHASE_ORDERS = [
     date: '07 Oct 2026',
     supplierId: 'SUPP-001',
     supplierName: 'Gujarat Fluorochemicals Ltd',
-    buyerName: 'SDF Oilchems Limited',
+    buyerName: 'Chemzora Oilchem Limited',
     gstin: '24AABCG5544K1Z2',
     address: 'Survey No 16/3, Dahej GIDC, Gujarat',
-    deliveryPoint: 'SDF Oilchems Ltd, Processing Plant #1, Dahej',
+    deliveryPoint: 'Chemzora Oilchem Ltd, Processing Plant #1, Dahej',
     material: 'Hydrochloric Acid 33% CP',
     hsn: '28061000',
     spec: 'Pure Grade 33% HCl, Iron <5ppm',
@@ -531,10 +531,10 @@ export const INITIAL_PURCHASE_ORDERS = [
     date: '06 Oct 2026',
     supplierId: 'SUPP-002',
     supplierName: 'Adani Wilmar Limited',
-    buyerName: 'SDF Oilchems Limited',
+    buyerName: 'Chemzora Oilchem Limited',
     gstin: '24AAACA8899C1Z3',
     address: 'Fortune House, Navrangpura, Ahmedabad 380009',
-    deliveryPoint: 'SDF Oilchems Ltd, Feedstock Silo Farm A-01, Dahej',
+    deliveryPoint: 'Chemzora Oilchem Ltd, Feedstock Silo Farm A-01, Dahej',
     material: 'Crude Palm Oil (Feedstock CPO)',
     hsn: '15111000',
     spec: 'FFA <5%, Moisture & Impurities <0.25%, DOBI >2.3',

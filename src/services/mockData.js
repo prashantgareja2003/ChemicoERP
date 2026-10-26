@@ -1,5 +1,5 @@
 /**
- * SDF Oilchems Limited - Mock ERP Datasets
+ * Chemzora Oilchem Limited - Mock ERP Datasets
  * Industrial Manufacturing domain: Oleochemicals, Fatty Acids, Glycerin, Esters & Solvents
  */
 

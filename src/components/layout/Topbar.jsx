@@ -12,6 +12,8 @@ import {
   Info,
   CheckCircle2,
   Check,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useErp } from '../../hooks/useErp';
 
@@ -27,7 +29,7 @@ const DUMMY_NOTIFICATIONS = [
   {
     id: 'n-2',
     title: 'Commercial Quotation Sign-off',
-    message: 'Quotation SOL/Q/1042 for Godrej Consumer Products submitted for executive approval.',
+    message: 'Quotation CHZ/Q/1042 for Godrej Consumer Products submitted for executive approval.',
     time: '18m ago',
     type: 'warning',
     unread: true,
@@ -67,7 +69,7 @@ const ROUTE_NAMES = {
 export function Topbar({ onToggleSidebar, onOpenTracker, onOpenTasks }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentUser, setCurrentUser, logout, users, quotations, purchaseOrders, qcRecords } = useErp();
+  const { currentUser, setCurrentUser, logout, users, quotations, purchaseOrders, qcRecords, theme, toggleTheme } = useErp();
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [plantMenuOpen, setPlantMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
@@ -229,7 +231,7 @@ export function Topbar({ onToggleSidebar, onOpenTracker, onOpenTasks }) {
                 right: -40,
                 width: 340,
                 maxWidth: 'calc(100vw - 24px)',
-                background: '#FFFFFF',
+                background: 'var(--color-bg-card)',
                 border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: 'var(--shadow-modal)',
@@ -355,6 +357,25 @@ export function Topbar({ onToggleSidebar, onOpenTracker, onOpenTasks }) {
           )}
         </div>
 
+        {/* Global Dark / Light Theme Toggle Button */}
+        <button
+          type="button"
+          className="erp-icon-btn erp-theme-mode-btn"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle theme mode"
+          style={{
+            cursor: 'pointer',
+            transition: 'all var(--transition-fast)',
+          }}
+        >
+          {theme === 'dark' ? (
+            <Sun size={16} color="#FBBF24" />
+          ) : (
+            <Moon size={16} color="#2563EB" />
+          )}
+        </button>
+
         {/* User Profile & Interactive Role Switcher matching screenshot */}
         <div style={{ position: 'relative' }}>
           <div
@@ -388,7 +409,7 @@ export function Topbar({ onToggleSidebar, onOpenTracker, onOpenTasks }) {
                 width: 240,
                 maxWidth: 'calc(100vw - 20px)',
                 boxSizing: 'border-box',
-                background: '#FFFFFF',
+                background: 'var(--color-bg-card)',
                 border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: 'var(--shadow-modal)',

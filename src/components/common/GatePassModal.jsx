@@ -212,7 +212,7 @@ export function GatePassModal({
                 userSelect: 'none',
               }}
             >
-              SDF GATE PASS CLEARED
+              CHEMZORA GATE PASS CLEARED
             </div>
 
             {/* Document Header */}
@@ -229,7 +229,7 @@ export function GatePassModal({
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <img
                   src="/logo.png"
-                  alt="SDF Logo"
+                  alt="Chemzora Logo"
                   style={{ width: 54, height: 54, objectFit: 'contain' }}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -245,7 +245,7 @@ export function GatePassModal({
                       color: '#047857',
                     }}
                   >
-                    SDF OILCHEMS LIMITED
+                    CHEMZORA OILCHEM LIMITED
                   </h2>
                   <div style={{ fontSize: '0.6875rem', color: '#475569', marginTop: 2, lineHeight: 1.35 }}>
                     Plot No. 1201, GIDC Industrial Estate, Dahej, Bharuch, Gujarat 392130<br />
@@ -302,7 +302,7 @@ export function GatePassModal({
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'monospace', fontWeight: 700 }}>
                 <QrCode size={16} />
-                <span>VERIFY: SDF-GP-{active.vehicleNo?.replace(/-/g, '') || 'GJ16AX8921'}</span>
+                <span>VERIFY: CHZ-GP-{active.vehicleNo?.replace(/-/g, '') || 'GJ16AX8921'}</span>
               </div>
             </div>
 
@@ -576,7 +576,7 @@ export function GatePassModal({
                 paddingTop: 6,
               }}
             >
-              This is a computer-verified Chemical Plant Outward Gate Pass authorized by SDF Oilchems Limited Dahej Security Control. Tampering with seals or documentation is strictly prohibited under Chemical Transport Safety Regulations.
+              This is a computer-verified Chemical Plant Outward Gate Pass authorized by Chemzora Oilchem Limited Dahej Security Control. Tampering with seals or documentation is strictly prohibited under Chemical Transport Safety Regulations.
             </div>
           </div>
         </div>

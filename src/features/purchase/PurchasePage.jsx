@@ -74,7 +74,7 @@ export function PurchasePage() {
     taxPercent: 18,
     deliverySchedule: 'Within 7 Days',
     creditPeriod: '30 Days Net',
-    deliveryPoint: 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
+    deliveryPoint: 'Chemzora Bulk Tank Farm, Dahej SEZ',
     refSoNumber: 'SOL/SO/2891',
   });
 
@@ -92,7 +92,7 @@ export function PurchasePage() {
       taxPercent: 18,
       deliverySchedule: 'Within 7 Days',
       creditPeriod: '30 Days Net',
-      deliveryPoint: 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
+      deliveryPoint: 'Chemzora Bulk Tank Farm, Dahej SEZ',
       refSoNumber: 'SOL/SO/2891',
     });
     setIsPoModalOpen(true);
@@ -112,7 +112,7 @@ export function PurchasePage() {
       taxPercent: row.taxPercent || 18,
       deliverySchedule: row.deliverySchedule || 'Within 7 Days',
       creditPeriod: row.creditPeriod || '30 Days Net',
-      deliveryPoint: row.deliveryPoint || 'SDF Oilchems Bulk Tank Farm, Dahej SEZ',
+      deliveryPoint: row.deliveryPoint || 'Chemzora Bulk Tank Farm, Dahej SEZ',
       refSoNumber: row.refSoNumber || '',
     });
     setIsPoModalOpen(true);
@@ -560,9 +560,9 @@ export function PurchasePage() {
           <div style={{ padding: 'var(--space-4)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#FFFFFF' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid var(--color-primary-dark)', paddingBottom: 8, marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <img src="/logo.png" alt="SDF Logo" style={{ width: 44, height: 44, objectFit: 'contain' }} />
+                <img src="/logo.png" alt="Chemzora Logo" style={{ width: 44, height: 44, objectFit: 'contain' }} />
                 <div>
-                  <h3 style={{ margin: 0, color: 'var(--color-primary-dark)' }}>SDF OILCHEMS LIMITED</h3>
+                  <h3 style={{ margin: 0, color: 'var(--color-primary-dark)' }}>CHEMZORA OILCHEM LIMITED</h3>
                   <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-secondary)' }}>
                     Dahej SEZ Unit #1, Gujarat • GSTIN: 24AAACS8912P1ZA
                   </div>
